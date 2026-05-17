@@ -1,3 +1,10 @@
+# Schaltplanbeschreibung 
+
+funktioniert direkt als Eingabe für den Claude-Skill "schematic-diagram", der den Schaltplan rendert.
+https://github.com/Tachy/claude-skills
+
+---
+
 ### 1. BAUTEILELISTE (COMPONENTS)
 
 - BAT1: Primärzelle | Typ: ER26500 Lithium-Thionylchlorid (Li-SOCl2) | Wert: 3.6V, 8500 mAh
