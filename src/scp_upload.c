@@ -1,11 +1,7 @@
 #include "scp_upload.h"
 #include "config.h"
+#include "ssh_key_data.h"
 #include "esp_log.h"
-
-// Vom Linker bereitgestellte Symbole für src/ssh_private_key.pem
-// (eingebettet via board_build.embed_txtfiles in platformio.ini)
-extern const char _binary_ssh_private_key_pem_start[];
-extern const char _binary_ssh_private_key_pem_end[];
 
 #include <libssh2.h>
 #include <sys/socket.h>
@@ -82,13 +78,11 @@ esp_err_t scp_upload(const uint8_t *data, size_t len, const char *remote_filenam
         goto cleanup;
     }
 
-    size_t privkey_len = (size_t)(_binary_ssh_private_key_pem_end
-                                  - _binary_ssh_private_key_pem_start);
     int auth_rc = libssh2_userauth_publickey_frommemory(
         session,
         SCP_USER, strlen(SCP_USER),
         NULL, 0,                                    // public key: libssh2 leitet ihn ab
-        _binary_ssh_private_key_pem_start, privkey_len,
+        ssh_privkey_data, ssh_privkey_len,
         SSH_KEY_PASSPHRASE
     );
     if (auth_rc != 0) {

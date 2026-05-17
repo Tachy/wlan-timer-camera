@@ -25,7 +25,7 @@ TPL5110 ──(DRV)──► Si2301 P-MOSFET ──► VCC_SWITCHED ──► ES
 | Intervallwiderstand | R1 = 100 kΩ → 15 min |
 | Schalttransistor | Si2301, P-Kanal MOSFET (SOT-23) |
 | Glättungskondensator | C1 = 470 µF / 6,3 V, Low-ESR |
-| MCU + Kamera | ESP32-CAM (AI-Thinker) mit OV2640 |
+| MCU + Kamera | ESP32-CAM (AI-Thinker) mit OV2640, 8 MB PSRAM, 4 MB Flash |
 
 **Achtung:** Der ESP32-CAM wird am **3,3-V-Pin** betrieben, nicht am 5-V-Pin.
 
@@ -177,3 +177,7 @@ Der Zähler wird im NVS (Flash) gespeichert und überlebt einen Neustart.
 | Gesamt pro Zyklus (15 min) | — | ~Ø 3–5 µA |
 
 Mit der ER26500 (8500 mAh) ergibt sich eine rechnerische Laufzeit von mehreren Jahren.
+
+> **Hinweis:** Das ESP32-CAM-Modul hat laut Datenblatt einen Tiefschlafstrom von mindestens 6 mA.
+> Dieser Wert ist für unser Design irrelevant, da der TPL5110 die Stromversorgung vollständig
+> trennt — der Schlafstrom entspricht dem Ruhestrom des TPL5110 (< 1 µA).

@@ -2,6 +2,9 @@
 src/ssh_private_key.pem
 src/wlan_keys.h
 
+# Auto-generiert aus src/ssh_private_key.pem
+src/ssh_key_data.c
+
 # PlatformIO Build-Artefakte
 .pio/
 .pioenvs/
