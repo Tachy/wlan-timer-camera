@@ -1,0 +1,13 @@
+# SSH-Schlüssel — nie einchecken
+src/ssh_key.h
+
+# PlatformIO Build-Artefakte
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# ESP-IDF
+sdkconfig
+build/
+managed_components/
+dependencies.lock

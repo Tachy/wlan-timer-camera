@@ -1,0 +1,221 @@
+digraph ESP32CAM_TPL5110 {
+    graph [
+        rankdir=LR
+        fontname="Arial"
+        fontsize=14
+        label="ESP32-CAM Intervallfotografie — TPL5110 + Si2301 Power-Gate\n3.6 V Li-SOCl₂ (ER26500) · 15 min Intervall · DONE-Abschaltung"
+        labelloc=t
+        labeljust=c
+        splines=spline
+        nodesep=0.9
+        ranksep=2.2
+        compound=true
+        bgcolor=white
+        pad=0.8
+    ]
+    node [fontname="Arial" fontsize=10 style="filled,rounded" shape=box margin="0.2,0.12"]
+    edge [
+        fontname="Arial"
+        fontsize=9
+        penwidth=1.5
+        labelfontsize=9
+        labeldistance=2.4
+        labelangle=25
+    ]
+
+    // ── GND-Symbole (ein Symbol pro Cluster) ──────────────────────────────
+    node [shape=invtriangle style=filled fillcolor="#444444" fontcolor=white
+          fontsize=8 width=0.4 height=0.28 margin="0.04,0.04" label="GND"]
+    gnd_bat   gnd_timer   gnd_switch   gnd_mcu
+
+    // Normaler Node-Stil wiederherstellen
+    node [shape=box style="filled,rounded" fontsize=10 fontcolor=black
+          margin="0.2,0.12" label="" width="" height=""]
+
+    // ── Zwischenschiene VCC_SWITCHED ─────────────────────────────────────
+    VCC_SW [
+        label="VCC_SWITCHED\n(3.6 V geschaltet)"
+        shape=diamond
+        fillcolor="#FFF3CD" color="#CC7700" penwidth=2.8
+        width=2.2 height=1.0 fontsize=10
+        style=filled
+    ]
+
+    // =====================================================================
+    // CLUSTER 1: Stromquelle
+    // =====================================================================
+    subgraph cluster_power {
+        label="Stromquelle"
+        style=filled
+        fillcolor="#FFF8E1"
+        color="#E65100"
+        penwidth=2
+        fontname="Arial"
+        fontsize=11
+
+        BAT1 [
+            label="BAT1: ER26500\nLi-SOCl₂ Primärzelle\n3.6 V  /  8500 mAh"
+            shape=cylinder
+            width=1.4 height=1.6
+            fillcolor="#FFF8E1" color="#E65100" penwidth=2.5
+        ]
+        gnd_bat
+    }
+
+    // =====================================================================
+    // CLUSTER 2: Timer-Steuerung
+    // =====================================================================
+    subgraph cluster_timer {
+        label="Timer-Steuerung"
+        style=filled
+        fillcolor="#E8F5E9"
+        color="#2E7D32"
+        penwidth=2
+        fontname="Arial"
+        fontsize=11
+
+        U1 [
+            label="U1: TPL5110\nPower-Timer (SOT-23-6)\n\nVDD | GND | DRV | DONE | DELAY"
+            shape=box
+            width=2.6 height=1.5
+            fillcolor="#E8F5E9" color="#2E7D32" penwidth=2
+        ]
+        R1 [
+            label="R1: 100 kΩ\n(Intervall-Widerstand)\n→ 15 min Periode"
+            shape=box
+            width=1.6 height=0.9
+            fillcolor="#E8F5E9" color="#2E7D32" penwidth=1.5
+        ]
+        gnd_timer
+    }
+
+    // =====================================================================
+    // CLUSTER 3: Schaltstufe
+    // =====================================================================
+    subgraph cluster_switch {
+        label="Schaltstufe"
+        style=filled
+        fillcolor="#E3F2FD"
+        color="#1565C0"
+        penwidth=2
+        fontname="Arial"
+        fontsize=11
+
+        Q1 [
+            label="Q1: Si2301\nP-Kanal MOSFET (SOT-23)\nSource | Gate | Drain"
+            shape=box
+            width=2.0 height=1.2
+            fillcolor="#E3F2FD" color="#1565C0" penwidth=2
+        ]
+        C1 [
+            label="C1: 470 µF / 6.3 V\nLow-ESR Elektrolytkondensator\n(Glättung nach MOSFET)"
+            shape=box
+            width=1.8 height=0.9
+            fillcolor="#E3F2FD" color="#1565C0" penwidth=1.5
+        ]
+        gnd_switch
+    }
+
+    // =====================================================================
+    // CLUSTER 4: Recheneinheit & Kamera
+    // =====================================================================
+    subgraph cluster_mcu {
+        label="Recheneinheit & Kamera"
+        style=filled
+        fillcolor="#F3E5F5"
+        color="#6A1B9A"
+        penwidth=2
+        fontname="Arial"
+        fontsize=11
+
+        M1 [
+            label="M1: ESP32-CAM\n+ OV2640 Kamera-Modul\nBlitz-LED intern (GPIO 4)\n\n3.3V | GND | GPIO 2 → DONE"
+            shape=box
+            width=2.6 height=1.8
+            fillcolor="#F3E5F5" color="#6A1B9A" penwidth=2
+        ]
+        gnd_mcu
+    }
+
+    // =====================================================================
+    // KANTEN / VERDRAHTUNG
+    // =====================================================================
+
+    // -- GND-Rückleiter -------------------------------------------------
+    BAT1 -> gnd_bat [
+        taillabel="-"  headlabel=""
+        color="#444444" penwidth=2 labelfontcolor="#444444"
+    ]
+    U1 -> gnd_timer [
+        taillabel="GND"  headlabel=""
+        color="#444444" penwidth=1.8 labelfontcolor="#444444"
+    ]
+    R1 -> gnd_timer [
+        taillabel="Pin 2"  headlabel=""
+        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    ]
+    C1 -> gnd_switch [
+        taillabel="-"  headlabel=""
+        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    ]
+    M1 -> gnd_mcu [
+        taillabel="GND"  headlabel=""
+        color="#444444" penwidth=1.8 labelfontcolor="#444444"
+    ]
+
+    // -- VCC_BATT: BAT1(+) → U1(VDD) -----------------------------------
+    BAT1 -> U1 [
+        taillabel="+"  headlabel="VDD"
+        color="#E65100" penwidth=2.8 labelfontcolor="#E65100"
+        label="VCC_BATT (3.6 V)"
+    ]
+
+    // -- VCC_BATT: BAT1(+) → Q1(Source)  [Bypass am Timer vorbei] ------
+    BAT1 -> Q1 [
+        taillabel="+"  headlabel="Source"
+        color="#E65100" penwidth=2.8 labelfontcolor="#E65100"
+        constraint=false
+    ]
+
+    // -- TPL_DRV: U1(DRV) → Q1(Gate) -----------------------------------
+    U1 -> Q1 [
+        taillabel="DRV"  headlabel="Gate"
+        color="#1565C0" penwidth=2.2 labelfontcolor="#1565C0"
+        label="TPL_DRV\n(Steuersignal)"
+    ]
+
+    // -- TPL_DELAY: U1(DELAY) → R1(Pin 1) ------------------------------
+    U1 -> R1 [
+        taillabel="DELAY"  headlabel="Pin 1"
+        color="#2E7D32" penwidth=1.8 labelfontcolor="#2E7D32"
+        label="TPL_DELAY"
+    ]
+
+    // -- VCC_SWITCHED: Q1(Drain) → Zwischenschiene ----------------------
+    Q1 -> VCC_SW [
+        taillabel="Drain"  headlabel=""
+        color="#CC7700" penwidth=2.8 labelfontcolor="#CC7700"
+        label="VCC_SWITCHED"
+    ]
+
+    // -- VCC_SWITCHED: Schiene → C1(+) ----------------------------------
+    VCC_SW -> C1 [
+        taillabel=""  headlabel="+"
+        color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
+    ]
+
+    // -- VCC_SWITCHED: Schiene → M1(3.3V) [direkt an 3.3V-Pin!] --------
+    VCC_SW -> M1 [
+        taillabel=""  headlabel="3.3V\n(!= 5V-Pin)"
+        color="#CC7700" penwidth=2.8 labelfontcolor="#CC7700"
+    ]
+
+    // -- MCU_DONE: M1(GPIO 2) → U1(DONE)  [Rückmelde-Signal] -----------
+    M1 -> U1 [
+        taillabel="GPIO 2"  headlabel="DONE"
+        color="#4527A0" penwidth=2 labelfontcolor="#4527A0"
+        label="MCU_DONE\n(Abschaltsignal)"
+        style=dashed
+        constraint=false
+    ]
+}
