@@ -12,3 +12,6 @@ sdkconfig
 build/
 managed_components/
 dependencies.lock
+sdkconfig.esp32cam
+src/CMakeLists.txt
+CMakeLists.txt

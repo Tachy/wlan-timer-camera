@@ -124,19 +124,23 @@ pio device monitor
 ## Projektstruktur
 
 ```
-├── platformio.ini          PlatformIO-Konfiguration
-├── sdkconfig.defaults      ESP-IDF Standardwerte (PSRAM, Stack, lwIP)
 ├── .gitignore
-├── components/
-│   └── libssh2/            SSH2-Bibliothek (manuell hinzufügen, s. o.)
+├── README.md
+├── platformio.ini              PlatformIO-Konfiguration
+├── sdkconfig.defaults          ESP-IDF Standardwerte (Flash, PSRAM, Stack, lwIP)
+├── huge_app.csv                Partitionstabelle (4 MB, App 3 MB)
+├── docs/
+│   ├── schaltplanbeschreibung.md
+│   └── esp32cam_tpl5110.dot / .svg / .png
 └── src/
-    ├── config.h            Alle konfigurierbaren Parameter
-    ├── ssh_private_key.pem.example  Vorlage für den SSH-Schlüssel
-    ├── main.c              Ablaufsteuerung
-    ├── camera.c / .h       OV2640-Initialisierung und Bildaufnahme
-    ├── wifi_conn.c / .h    WLAN-Verbindung
-    ├── scp_upload.c / .h   SCP-Upload via libssh2
-    └── idf_component.yml   ESP-IDF-Komponentenabhängigkeiten
+    ├── config.h                Alle konfigurierbaren Parameter (SCP-Ziel, Pins, …)
+    ├── wlan_keys.h.example     Vorlage WLAN-Zugangsdaten → wlan_keys.h (gitignored)
+    ├── ssh_private_key.pem.example  Vorlage SSH-Schlüssel → ssh_private_key.pem (gitignored)
+    ├── idf_component.yml       ESP-IDF-Komponentenabhängigkeiten (Kamera, libssh2)
+    ├── main.c                  Ablaufsteuerung
+    ├── camera.c / .h           OV2640-Initialisierung, Bildaufnahme mit Blitz-LED
+    ├── wifi_conn.c / .h        WLAN-Verbindung
+    └── scp_upload.c / .h      SCP-Upload via libssh2
 ```
 
 ## Ablaufdiagramm Firmware
