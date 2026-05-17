@@ -75,16 +75,10 @@ digraph ESP32CAM_TPL5110 {
         fontsize=11
 
         U1 [
-            label="U1: TPL5110\nPower-Timer (SOT-23-6)\n\nVDD | GND | DRV | DONE | DELAY"
+            label="U1: TPL5110\nPower-Timer-Breakout\n(SOT-23-6 / 5-Pin-Block)\n\nVDD | GND | DRV | DONE\nIntervall 15 min (intern)"
             shape=box
-            width=2.6 height=1.5
+            width=2.6 height=1.8
             fillcolor="#E8F5E9" color="#2E7D32" penwidth=2
-        ]
-        R1 [
-            label="R1: 100 kΩ\n(Intervall-Widerstand)\n→ 15 min Periode"
-            shape=box
-            width=1.6 height=0.9
-            fillcolor="#E8F5E9" color="#2E7D32" penwidth=1.5
         ]
         gnd_timer
     }
@@ -129,9 +123,9 @@ digraph ESP32CAM_TPL5110 {
         fontsize=11
 
         M1 [
-            label="M1: ESP32-CAM\n+ OV2640 Kamera-Modul\nBlitz-LED intern (GPIO 4)\n\n3.3V | GND | GPIO 2 → DONE"
+            label="M1: ESP32-CAM\n+ OV2640 Kamera-Modul\n8 MB PSRAM · 4 MB Flash\nBlitz-LED intern (GPIO 4)\nWLAN-Upload per SCP\n\n3.3V | GND | GPIO 2 → DONE"
             shape=box
-            width=2.6 height=1.8
+            width=2.8 height=2.2
             fillcolor="#F3E5F5" color="#6A1B9A" penwidth=2
         ]
         gnd_mcu
@@ -149,10 +143,6 @@ digraph ESP32CAM_TPL5110 {
     U1 -> gnd_timer [
         taillabel="GND"  headlabel=""
         color="#444444" penwidth=1.8 labelfontcolor="#444444"
-    ]
-    R1 -> gnd_timer [
-        taillabel="Pin 2"  headlabel=""
-        color="#444444" penwidth=1.5 labelfontcolor="#444444"
     ]
     C1 -> gnd_switch [
         taillabel="-"  headlabel=""
@@ -182,13 +172,6 @@ digraph ESP32CAM_TPL5110 {
         taillabel="DRV"  headlabel="Gate"
         color="#1565C0" penwidth=2.2 labelfontcolor="#1565C0"
         label="TPL_DRV\n(Steuersignal)"
-    ]
-
-    // -- TPL_DELAY: U1(DELAY) → R1(Pin 1) ------------------------------
-    U1 -> R1 [
-        taillabel="DELAY"  headlabel="Pin 1"
-        color="#2E7D32" penwidth=1.8 labelfontcolor="#2E7D32"
-        label="TPL_DELAY"
     ]
 
     // -- VCC_SWITCHED: Q1(Drain) → Zwischenschiene ----------------------
