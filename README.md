@@ -111,7 +111,14 @@ Bildqualität und Auflösung bei Bedarf anpassen:
 
 ### 6. Firmware bauen und flashen
 
+```Powershell
+winget install dorssel.usbipd-win
+usbipd list
+usbipd attach --wsl --busid <Deine-ID>
+```
+
 ```bash
+lsusb
 pio run --target upload
 ```
 
@@ -119,6 +126,12 @@ Serielle Ausgabe beobachten:
 
 ```bash
 pio device monitor
+```
+
+Nach Testlauf und Abstecken des Boards:
+
+```Powershell
+usbipd detach --busid <Deine-ID>
 ```
 
 ## Projektstruktur
@@ -140,7 +153,7 @@ pio device monitor
     ├── main.c                  Ablaufsteuerung
     ├── camera.c / .h           OV2640-Initialisierung, Bildaufnahme mit Blitz-LED
     ├── wifi_conn.c / .h        WLAN-Verbindung
-    └── scp_upload.c / .h      SCP-Upload via libssh2
+    └── scp_upload.c / .h       SCP-Upload via libssh2
 ```
 
 ## Ablaufdiagramm Firmware
