@@ -111,14 +111,28 @@ Bildqualität und Auflösung bei Bedarf anpassen:
 
 ### 6. Firmware bauen und flashen
 
+Einmalig: usbipd installieren (als Administrator):
+
 ```Powershell
 winget install dorssel.usbipd-win
+```
+
+Board anstecken und durchrouten (als Administrator):
+
+```Powershell
 usbipd list
 usbipd attach --wsl --busid <Deine-ID>
 ```
 
+Prüfen, ob Port durchgeroutet wird:
+
 ```bash
 lsusb
+```
+
+Board programmieren:
+
+```bash
 pio run --target upload
 ```
 
@@ -128,11 +142,6 @@ Serielle Ausgabe beobachten:
 pio device monitor
 ```
 
-Nach Testlauf und Abstecken des Boards:
-
-```Powershell
-usbipd detach --busid <Deine-ID>
-```
 
 ## Projektstruktur
 
