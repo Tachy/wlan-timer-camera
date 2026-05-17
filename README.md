@@ -72,35 +72,31 @@ chmod 600 /home/kamera/.ssh/authorized_keys
 
 ### 4. Schlüssel in die Firmware einbetten
 
-Datei `src/ssh_key.h` anlegen (wird nicht eingecheckt):
+PEM-Datei anlegen und 1:1 den Inhalt von `~/.ssh/kamera` hineinkopieren:
 
 ```bash
-cp src/ssh_key.h.example src/ssh_key.h   # falls vorhanden, sonst manuell anlegen
+# Inhalt von ~/.ssh/kamera nach src/ssh_private_key.pem einfügen — keine Umformatierung nötig
+cat ~/.ssh/kamera > src/ssh_private_key.pem
 ```
 
-Inhalt von `~/.ssh/kamera` in `SSH_PRIVATE_KEY` einfügen:
-
-```c
-#pragma once
-
-#define SSH_PRIVATE_KEY \
-    "-----BEGIN OPENSSH PRIVATE KEY-----\n" \
-    "b3BlbnNzaC1rZXktdjEAAAAABG5v...\n" \
-    "-----END OPENSSH PRIVATE KEY-----\n"
-
-#define SSH_KEY_PASSPHRASE  ""
-```
-
-Jede Zeile des Base64-Blocks als eigenes String-Literal mit `\n` und `\` abschließen.
+Der Linker bettet die Datei beim Build automatisch ein (`board_build.embed_txtfiles`).
 
 ### 5. Konfiguration anpassen
 
-`src/config.h` öffnen und folgende Werte setzen:
+WLAN-Zugangsdaten in `src/wlan_keys.h` eintragen (wird nicht eingecheckt):
+
+```bash
+cp src/wlan_keys.h.example src/wlan_keys.h
+```
 
 ```c
-#define WIFI_SSID        "MeinNetzwerk"
-#define WIFI_PASSWORD    "MeinPasswort"
+#define WIFI_SSID      "MeinNetzwerk"
+#define WIFI_PASSWORD  "MeinPasswort"
+```
 
+SCP-Ziel in `src/config.h` anpassen:
+
+```c
 #define SCP_HOST         "192.168.1.100"   // IP oder Hostname des Zielservers
 #define SCP_USER         "kamera"
 #define SCP_REMOTE_DIR   "/home/kamera/bilder/"
@@ -135,7 +131,7 @@ pio device monitor
 │   └── libssh2/            SSH2-Bibliothek (manuell hinzufügen, s. o.)
 └── src/
     ├── config.h            Alle konfigurierbaren Parameter
-    ├── ssh_key.h           Privater SSH-Schlüssel (nicht im Repo!)
+    ├── ssh_private_key.pem.example  Vorlage für den SSH-Schlüssel
     ├── main.c              Ablaufsteuerung
     ├── camera.c / .h       OV2640-Initialisierung und Bildaufnahme
     ├── wifi_conn.c / .h    WLAN-Verbindung

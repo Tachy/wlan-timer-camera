@@ -1,5 +1,6 @@
-# SSH-Schlüssel — nie einchecken
-src/ssh_key.h
+# Zugangsdaten — nie einchecken
+src/ssh_private_key.pem
+src/wlan_keys.h
 
 # PlatformIO Build-Artefakte
 .pio/

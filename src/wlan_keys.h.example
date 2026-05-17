@@ -1,0 +1,8 @@
+#pragma once
+
+// Datei kopieren und umbenennen:
+//   cp src/wlan_keys.h.example src/wlan_keys.h
+// Dann SSID und Passwort eintragen.
+
+#define WIFI_SSID      "MeinNetzwerk"
+#define WIFI_PASSWORD  "MeinPasswort"

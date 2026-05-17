@@ -1,16 +1,19 @@
 #pragma once
 
 // ── WLAN ─────────────────────────────────────────────────────────────────────
-#define WIFI_SSID           "MeinNetzwerk"
-#define WIFI_PASSWORD       "MeinPasswort"
+// SSID und Passwort kommen aus src/wlan_keys.h (nicht im Repo).
+// Vorlage: cp src/wlan_keys.h.example src/wlan_keys.h
+#include "wlan_keys.h"
 #define WIFI_TIMEOUT_MS     20000
 
 // ── SCP-Ziel ─────────────────────────────────────────────────────────────────
-// Privater SSH-Schlüssel: siehe src/ssh_key.h (nicht ins Repository!)
-#define SCP_HOST            "192.168.1.100"
-#define SCP_PORT            22
-#define SCP_USER            "kamera"
-#define SCP_REMOTE_DIR      "/home/kamera/bilder/"
+// Privater SSH-Schlüssel: src/ssh_private_key.pem (nicht im Repo, s. .gitignore)
+// Passphrase leer lassen, wenn der Schlüssel ohne Passphrase erzeugt wurde.
+#define SSH_KEY_PASSPHRASE  ""
+#define SCP_HOST            "192.168.179.4"
+#define SCP_PORT            29876
+#define SCP_USER            "apache"
+#define SCP_REMOTE_DIR      "/var/www/html/img/"
 #define SCP_TIMEOUT_SEC     30
 
 // ── Hardware-Pins (ESP32-CAM AI-Thinker) ─────────────────────────────────────
@@ -22,5 +25,5 @@
 #define CAM_JPEG_QUALITY    12               // 0–63, niedriger = besser
 
 // ── NVS-Namespace für Boot-Zähler ────────────────────────────────────────────
-#define NVS_NAMESPACE       "cam"
+#define NVS_NAMESPACE       "cam1"
 #define NVS_KEY_COUNTER     "boot_cnt"
