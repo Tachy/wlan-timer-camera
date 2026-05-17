@@ -86,7 +86,7 @@
 <text text-anchor="middle" x="888.09" y="-104" font-family="Arial" font-size="10.00">8 MB PSRAM · 4 MB Flash</text>
 <text text-anchor="middle" x="888.09" y="-93" font-family="Arial" font-size="10.00">Blitz&#45;LED intern (GPIO 4)</text>
 <text text-anchor="middle" x="888.09" y="-82" font-family="Arial" font-size="10.00">WLAN&#45;Upload per SCP</text>
-<text text-anchor="middle" x="888.09" y="-59" font-family="Arial" font-size="10.00">3.3V | GND | GPIO 2 → DONE</text>
+<text text-anchor="middle" x="888.09" y="-59" font-family="Arial" font-size="10.00">3.3V | GND | GPIO 12 → DONE</text>
 </g>
 <!-- VCC_SW&#45;&gt;M1 -->
 <g id="edge10" class="edge">
@@ -194,7 +194,7 @@
 <text text-anchor="middle" x="671.59" y="-459.8" font-family="Arial" font-size="9.00">MCU_DONE</text>
 <text text-anchor="middle" x="671.59" y="-449.8" font-family="Arial" font-size="9.00">(Abschaltsignal)</text>
 <text text-anchor="middle" x="568.24" y="-524.08" font-family="Arial" font-size="9.00" fill="#4527a0">DONE</text>
-<text text-anchor="middle" x="788.55" y="-182.05" font-family="Arial" font-size="9.00" fill="#4527a0">GPIO 2</text>
+<text text-anchor="middle" x="788.55" y="-182.05" font-family="Arial" font-size="9.00" fill="#4527a0">GPIO 12</text>
 </g>
 </g>
 </svg>

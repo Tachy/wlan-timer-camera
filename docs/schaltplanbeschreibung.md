@@ -33,5 +33,5 @@ Verbinde die Pins der Bauteile exakt nach folgenden elektrischen Netzen (Nets):
 - M1 (Pin 3.3V)  <-- WICHTIG: Direkt an 3.3V, nicht an den 5V-Pin!
 
 #### Netz: MCU_DONE (Abschaltsignal)
-- M1 (Pin GPIO 2)
+- M1 (Pin GPIO 12)
 - U1 (Pin DONE)

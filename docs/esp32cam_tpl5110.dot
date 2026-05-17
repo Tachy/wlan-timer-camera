@@ -123,7 +123,7 @@ digraph ESP32CAM_TPL5110 {
         fontsize=11
 
         M1 [
-            label="M1: ESP32-CAM\n+ OV2640 Kamera-Modul\n8 MB PSRAM · 4 MB Flash\nBlitz-LED intern (GPIO 4)\nWLAN-Upload per SCP\n\n3.3V | GND | GPIO 2 → DONE"
+            label="M1: ESP32-CAM\n+ OV2640 Kamera-Modul\n8 MB PSRAM · 4 MB Flash\nBlitz-LED intern (GPIO 4)\nWLAN-Upload per SCP\n\n3.3V | GND | GPIO 12 → DONE"
             shape=box
             width=2.8 height=2.2
             fillcolor="#F3E5F5" color="#6A1B9A" penwidth=2
@@ -193,9 +193,9 @@ digraph ESP32CAM_TPL5110 {
         color="#CC7700" penwidth=2.8 labelfontcolor="#CC7700"
     ]
 
-    // -- MCU_DONE: M1(GPIO 2) → U1(DONE)  [Rückmelde-Signal] -----------
+    // -- MCU_DONE: M1(GPIO 12) → U1(DONE)  [Rückmelde-Signal] ----------
     M1 -> U1 [
-        taillabel="GPIO 2"  headlabel="DONE"
+        taillabel="GPIO 12"  headlabel="DONE"
         color="#4527A0" penwidth=2 labelfontcolor="#4527A0"
         label="MCU_DONE\n(Abschaltsignal)"
         style=dashed
