@@ -9,12 +9,12 @@ Die MCU läuft nur während der Aufnahme — die Stromversorgung übernimmt der 
 ```
 TPL5110 ──(DRV)──► Si2301 P-MOSFET ──► VCC_SWITCHED ──► ESP32-CAM (3,3 V-Pin)
                                                                │
-                         TPL5110 ◄──(DONE, GPIO 12)────────────┘
+                         TPL5110 ◄──(DONE, GPIO 13)────────────┘
 ```
 
 1. TPL5110 schaltet alle 15 Minuten den MOSFET durch → ESP32-CAM startet
 2. Firmware läuft durch: NVS-Zähler → Kamera → WLAN → SCP-Upload
-3. GPIO 12 wird auf HIGH gezogen → TPL5110 trennt die Stromversorgung
+3. GPIO 13 wird auf HIGH gezogen → TPL5110 trennt die Stromversorgung
 
 ## Hardware
 
@@ -33,7 +33,7 @@ TPL5110 ──(DRV)──► Si2301 P-MOSFET ──► VCC_SWITCHED ──► ES
 
 | Signal | GPIO |
 |---|---|
-| DONE → TPL5110 | GPIO 12 |
+| DONE → TPL5110 | GPIO 13 |
 | Blitz-LED (intern) | GPIO 4 |
 | Kamera-Pins | festgelegt in `src/camera.c` |
 
@@ -169,7 +169,7 @@ app_main()
   ├─ SCP-Upload
   │    TCP connect → SSH-Handshake → Key-Auth → scp_send64 → Daten → EOF
   ├─ WLAN trennen
-  └─ GPIO 12 HIGH (200 ms) → TPL5110 schaltet Strom ab
+  └─ GPIO 13 HIGH (200 ms) → TPL5110 schaltet Strom ab
 ```
 
 Bei jedem Fehler (Kamera, WLAN, Upload) wird das DONE-Signal trotzdem gesendet,
