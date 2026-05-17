@@ -22,6 +22,7 @@ Verbinde die Pins der Bauteile exakt nach folgenden elektrischen Netzen (Nets):
 - BAT1 (Pluspol / +)
 - U1 (Pin VDD)
 - Q1 (Pin Source)
+- C1 (Pluspol / +)
 
 #### Netz: TPL_DRV (Timer-Steuersignal)
 - U1 (Pin DRV)
@@ -29,9 +30,8 @@ Verbinde die Pins der Bauteile exakt nach folgenden elektrischen Netzen (Nets):
 
 #### Netz: VCC_SWITCHED (Geschaltete Versorgungsleitung - HIER SITZT DER ELKO)
 - Q1 (Pin Drain)
-- C1 (Pluspol / +)
 - M1 (Pin 3.3V)  <-- WICHTIG: Direkt an 3.3V, nicht an den 5V-Pin!
 
 #### Netz: MCU_DONE (Abschaltsignal)
-- M1 (Pin GPIO 12)
+- M1 (Pin GPIO 13)
 - U1 (Pin DONE)

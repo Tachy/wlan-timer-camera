@@ -17,7 +17,7 @@
 #define SCP_TIMEOUT_SEC     30
 
 // ── Hardware-Pins (ESP32-CAM AI-Thinker) ─────────────────────────────────────
-#define PIN_DONE            12  // GPIO 12 → DONE-Signal an TPL5110
+#define PIN_DONE            13  // GPIO 13 → DONE-Signal an TPL5110
 #define PIN_FLASH_LED       4   // interne Blitz-LED (aktiv HIGH)
 
 // ── Kamera-Einstellungen ─────────────────────────────────────────────────────
