@@ -21,8 +21,7 @@ TPL5110 ──(DRV)──► Si2301 P-MOSFET ──► VCC_SWITCHED ──► ES
 | Bauteil | Wert / Typ |
 |---|---|
 | Batterie | ER26500, Li-SOCl₂, 3,6 V / 8500 mAh |
-| Timer | TPL5110 (SOT-23-6) |
-| Intervallwiderstand | R1 = 100 kΩ → 15 min |
+| Timer | TPL5110 (SOT-23-6) Breakout |
 | Schalttransistor | Si2301, P-Kanal MOSFET (SOT-23) |
 | Glättungskondensator | C1 = 470 µF / 6,3 V, Low-ESR |
 | MCU + Kamera | ESP32-CAM (AI-Thinker) mit OV2640, 8 MB PSRAM, 4 MB Flash |
