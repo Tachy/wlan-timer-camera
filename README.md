@@ -1,7 +1,7 @@
 # WLAN Timer-Kamera
 
-ESP32-CAM Intervallfotografie mit TPL5110-gesteuertem Power-Gating.
-Alle 15 Minuten wird ein Bild aufgenommen und per SCP auf einen Server übertragen.
+Extrem stromsparende batteriebetriebene WLAN-Kamera mit LED-Blitz, die alle 15 Minuten (Zeit einstellbar) ein Bild aufnimmt und per SCP auf einem Server ablegt.
+Meine Anwendung: innerhalb eines großen Briefkastens nachschauen, ob Post angekommen ist.
 Die MCU läuft nur während der Aufnahme — die Stromversorgung übernimmt der Hardware-Timer.
 
 ## Funktionsprinzip
