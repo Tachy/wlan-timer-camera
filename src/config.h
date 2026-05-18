@@ -6,6 +6,9 @@
 #include "wlan_keys.h"
 #define WIFI_TIMEOUT_MS     20000
 
+// ── Bild-Dateiname ────────────────────────────────────────────────────────────
+#define IMAGE_FILENAME      "esp32cam_image.jpg"
+
 // ── SCP-Ziel ─────────────────────────────────────────────────────────────────
 // Privater SSH-Schlüssel: src/ssh_private_key.pem (nicht im Repo, s. .gitignore)
 // Passphrase leer lassen, wenn der Schlüssel ohne Passphrase erzeugt wurde.
@@ -24,6 +27,3 @@
 #define CAM_FRAME_SIZE      FRAMESIZE_UXGA   // 1600 × 1200
 #define CAM_JPEG_QUALITY    12               // 0–63, niedriger = besser
 
-// ── NVS-Namespace für Boot-Zähler ────────────────────────────────────────────
-#define NVS_NAMESPACE       "cam1"
-#define NVS_KEY_COUNTER     "boot_cnt"

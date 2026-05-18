@@ -1,11 +1,9 @@
 #include <stdio.h>
-#include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "nvs_flash.h"
-#include "nvs.h"
 
 #include "config.h"
 #include "camera.h"
@@ -31,44 +29,18 @@ static void signal_done(void)
     vTaskDelay(pdMS_TO_TICKS(200));
 }
 
-// Liest den Boot-Zähler aus NVS und inkrementiert ihn.
-// Gibt den *alten* Wert zurück (für den Dateinamen).
-static uint32_t get_and_increment_counter(void)
-{
-    nvs_handle_t h;
-    uint32_t counter = 0;
-
-    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &h) == ESP_OK) {
-        nvs_get_u32(h, NVS_KEY_COUNTER, &counter);
-        nvs_set_u32(h, NVS_KEY_COUNTER, counter + 1);
-        nvs_commit(h);
-        nvs_close(h);
-    }
-    return counter;
-}
-
-static void make_filename(char *buf, size_t buflen, uint32_t counter)
-{
-    snprintf(buf, buflen, "img_%06" PRIu32 ".jpg", counter);
-}
-
 // ── Hauptprogramm ────────────────────────────────────────────────────────────
 
 void app_main(void)
 {
     ESP_LOGI(TAG, "=== WLAN Timer-Kamera gestartet ===");
 
-    // NVS initialisieren (wird auch von WiFi-Subsystem benötigt)
+    // NVS initialisieren (wird vom WiFi-Subsystem benötigt)
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ESP_ERROR_CHECK(nvs_flash_init());
     }
-
-    uint32_t counter = get_and_increment_counter();
-    char filename[32];
-    make_filename(filename, sizeof(filename), counter);
-    ESP_LOGI(TAG, "Dateiname: %s", filename);
 
     // 1. Kamera initialisieren
     if (camera_init() != ESP_OK) {
@@ -94,7 +66,7 @@ void app_main(void)
     }
 
     // 4. Bild per SCP hochladen
-    esp_err_t up = scp_upload(fb->buf, fb->len, filename);
+    esp_err_t up = scp_upload(fb->buf, fb->len, IMAGE_FILENAME);
     if (up != ESP_OK) {
         ESP_LOGE(TAG, "SCP-Upload fehlgeschlagen");
     }
