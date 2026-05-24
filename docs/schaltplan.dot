@@ -3,7 +3,7 @@ digraph WlanTimerCamera {
         rankdir=LR
         fontname="Arial"
         fontsize=14
-        label="WLAN Timer Camera — Schaltplan\n(ESP32-CAM + TPL5110 + Si2301 + ER26500)"
+        label="WLAN Timer Camera — Schaltplan\n(ESP32-CAM + TPL5110 + Si2301 + R1 100 kΩ + ER26500)"
         labelloc=t
         labeljust=c
         splines=spline
@@ -26,7 +26,7 @@ digraph WlanTimerCamera {
     // ── GND-Symbole (je eines pro Cluster) ───────────────────────────────────
     node [shape=invtriangle style=filled fillcolor="#444444" fontcolor=white
           fontsize=8 width=0.4 height=0.28 margin="0.04,0.04" label="GND"]
-    gnd_src  gnd_timer  gnd_switch  gnd_mcu
+    gnd_src  gnd_timer  gnd_mcu
 
     // Normalen Node-Stil wiederherstellen
     node [shape=box style="filled,rounded" fontsize=10 fontcolor=black margin="0.2,0.12"]
@@ -84,12 +84,11 @@ digraph WlanTimerCamera {
             shape=box width=1.9 height=1.1
             fillcolor="#E3F2FD" color="#1565C0" penwidth=2
         ]
-        C1 [
-            label="C1\n470 µF / 6.3 V\n(Low-ESR Elko)"
+        R1 [
+            label="R1\n100 kΩ\n(Gate Pull-up)"
             shape=box width=1.1 height=0.8
             fillcolor="#E3F2FD" color="#1565C0"
         ]
-        gnd_switch
     }
 
     // ── Cluster: Recheneinheit & Kamera ──────────────────────────────────────
@@ -102,6 +101,11 @@ digraph WlanTimerCamera {
             label="M1 — ESP32-CAM (AI-Thinker)\nOV2640 Kamera\nFlash-LED: GPIO 4\nVersorgung: 3.3 V | GND\nDONE-Signal: GPIO 13"
             shape=box width=2.6 height=1.6
             fillcolor="#E8F5E9" color="#2E7D32" penwidth=2
+        ]
+        C1 [
+            label="C1\n470 µF / 6.3 V\n(Low-ESR Elko)"
+            shape=box width=1.1 height=0.8
+            fillcolor="#E8F5E9" color="#2E7D32"
         ]
         gnd_mcu
     }
@@ -127,11 +131,25 @@ digraph WlanTimerCamera {
         constraint=false
     ]
 
+    // VCC_BATT → R1 Pin 1 (Pull-up Versorgung)
+    VCC_BATT -> R1 [
+        taillabel=""  headlabel="Pin 1"
+        color="#E65100" penwidth=1.5 labelfontcolor="#E65100"
+        constraint=false
+    ]
+
     // ── Kante: Steuersignal DRV ──────────────────────────────────────────────
     U1 -> Q1 [
         taillabel="DRV"  headlabel="Gate"
         color="#1565C0" penwidth=2 labelfontcolor="#1565C0"
         label="TPL_DRV"
+    ]
+
+    // R1 Pin 2 → Q1 Gate (Pull-up hält Gate auf VCC_BATT wenn DRV hochohmig)
+    R1 -> Q1 [
+        taillabel="Pin 2"  headlabel="Gate"
+        color="#1565C0" penwidth=1.5 style=dashed labelfontcolor="#1565C0"
+        label="Pull-up"
     ]
 
     // ── Kanten: Geschalteter Pfad ────────────────────────────────────────────
@@ -172,7 +190,7 @@ digraph WlanTimerCamera {
         taillabel="GND"  headlabel=""
         color="#444444" penwidth=1.5 labelfontcolor="#444444"
     ]
-    C1 -> gnd_switch [
+    C1 -> gnd_mcu [
         taillabel="-"  headlabel=""
         color="#444444" penwidth=1.5 labelfontcolor="#444444"
     ]

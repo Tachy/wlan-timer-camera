@@ -133,3 +133,70 @@ cleanup:
     if (sock >= 0) close(sock);
     return result;
 }
+
+esp_err_t ssh_exec_append_log(int rssi_pct)
+{
+    int sock = -1;
+    LIBSSH2_SESSION *session = NULL;
+    LIBSSH2_CHANNEL *channel = NULL;
+    esp_err_t result = ESP_FAIL;
+
+    sock = tcp_connect();
+    if (sock < 0) return ESP_FAIL;
+
+    if (libssh2_init(0) != 0) {
+        ESP_LOGE(TAG, "libssh2_init fehlgeschlagen (log)");
+        goto log_cleanup;
+    }
+
+    session = libssh2_session_init();
+    if (!session) goto log_cleanup;
+
+    libssh2_session_set_blocking(session, 1);
+
+    if (libssh2_session_handshake(session, sock) != 0) goto log_cleanup;
+
+    if (libssh2_userauth_publickey_frommemory(
+            session,
+            SCP_USER, strlen(SCP_USER),
+            NULL, 0,
+            ssh_privkey_data, ssh_privkey_len,
+            SSH_KEY_PASSPHRASE) != 0) {
+        ESP_LOGE(TAG, "SSH-Auth fehlgeschlagen (log)");
+        goto log_cleanup;
+    }
+
+    channel = libssh2_channel_open_session(session);
+    if (!channel) {
+        ESP_LOGE(TAG, "SSH-Channel fehlgeschlagen (log)");
+        goto log_cleanup;
+    }
+
+    char cmd[320];
+    snprintf(cmd, sizeof(cmd),
+        "echo \"$(date '+%%Y-%%m-%%d %%H:%%M:%%S %%Z')  WLAN-Signal: %d %%\" "
+        ">> " SCP_REMOTE_DIR LOG_FILENAME,
+        rssi_pct);
+
+    if (libssh2_channel_exec(channel, cmd) != 0) {
+        ESP_LOGE(TAG, "SSH exec fehlgeschlagen");
+        goto log_cleanup;
+    }
+
+    libssh2_channel_send_eof(channel);
+    libssh2_channel_wait_eof(channel);
+    libssh2_channel_wait_closed(channel);
+
+    ESP_LOGI(TAG, "Signal-Log geschrieben: %d %%", rssi_pct);
+    result = ESP_OK;
+
+log_cleanup:
+    if (channel) libssh2_channel_free(channel);
+    if (session) {
+        libssh2_session_disconnect(session, "Normal shutdown");
+        libssh2_session_free(session);
+    }
+    libssh2_exit();
+    if (sock >= 0) close(sock);
+    return result;
+}

@@ -33,8 +33,9 @@ static void on_ip_event(void *arg, esp_event_base_t base, int32_t id, void *data
     }
 }
 
-esp_err_t wifi_connect(void)
+esp_err_t wifi_connect(int *rssi_pct_out)
 {
+    *rssi_pct_out = 0;
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -72,6 +73,14 @@ esp_err_t wifi_connect(void)
         pdMS_TO_TICKS(WIFI_TIMEOUT_MS));
 
     if (bits & CONNECTED_BIT) {
+        wifi_ap_record_t ap_info;
+        if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK) {
+            int pct = (ap_info.rssi + 100) * 2;
+            if (pct < 0)   pct = 0;
+            if (pct > 100) pct = 100;
+            *rssi_pct_out = pct;
+            ESP_LOGI(TAG, "WLAN-Signal: %d dBm (%d %%)", ap_info.rssi, pct);
+        }
         return ESP_OK;
     }
 

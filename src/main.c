@@ -58,7 +58,8 @@ void app_main(void)
     }
 
     // 3. WLAN verbinden
-    if (wifi_connect() != ESP_OK) {
+    int rssi_pct = 0;
+    if (wifi_connect(&rssi_pct) != ESP_OK) {
         ESP_LOGE(TAG, "WLAN fehlgeschlagen — Bild wird verworfen");
         camera_fb_return(fb);
         signal_done();
@@ -69,6 +70,11 @@ void app_main(void)
     esp_err_t up = scp_upload(fb->buf, fb->len, IMAGE_FILENAME);
     if (up != ESP_OK) {
         ESP_LOGE(TAG, "SCP-Upload fehlgeschlagen");
+    }
+
+    // 4b. Signalstärke auf dem Server mitloggen
+    if (ssh_exec_append_log(rssi_pct) != ESP_OK) {
+        ESP_LOGW(TAG, "Signal-Log fehlgeschlagen");
     }
 
     // 5. Aufräumen

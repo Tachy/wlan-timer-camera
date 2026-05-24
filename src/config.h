@@ -8,6 +8,7 @@
 
 // ── Bild-Dateiname ────────────────────────────────────────────────────────────
 #define IMAGE_FILENAME      "esp32cam_image.jpg"
+#define LOG_FILENAME        "esp32cam_image.log"
 
 // ── SCP-Ziel ─────────────────────────────────────────────────────────────────
 // Privater SSH-Schlüssel: src/ssh_private_key.pem (nicht im Repo, s. .gitignore)
