@@ -89,12 +89,6 @@ digraph WlanTimerCamera {
             fillcolor="#E3F2FD" color="#1565C0" penwidth=2
             style="filled,rounded"
         ]
-        C1 [
-            label="C1\n470 µF / 6.3 V\nElko (Low-ESR)\n(parallel zur Kamera)"
-            shape=box width=1.5 height=1.0
-            fillcolor="#E3F2FD" color="#1565C0"
-            style="filled,rounded"
-        ]
         gnd_mosfet
     }
 
@@ -108,6 +102,12 @@ digraph WlanTimerCamera {
             label="M1 — ESP32-CAM (AI-Thinker)\nOV2640 · Flash-LED GPIO4\n3.3V (Dauerpuls) | GND (geschaltet) | GPIO13 (DONE)"
             shape=box width=2.8 height=1.5
             fillcolor="#E8F5E9" color="#2E7D32" penwidth=2
+            style="filled,rounded"
+        ]
+        C1 [
+            label="C1\n470 µF / 6.3 V\nElko (Low-ESR)\n(parallel zur Kamera)"
+            shape=box width=1.5 height=1.0
+            fillcolor="#E8F5E9" color="#2E7D32"
             style="filled,rounded"
         ]
     }
