@@ -3,12 +3,12 @@ digraph WlanTimerCamera {
         rankdir=LR
         fontname="Arial"
         fontsize=14
-        label="WLAN Timer Camera — Schaltplan\n(ESP32-CAM + TPL5110 + Si2301 + R1 100 kΩ + ER26500)"
+        label="WLAN Timer Camera — Schaltplan\nTPL5110 Power-Timer · AO3400 N-Kanal Low-Side-Switch · ESP32-CAM"
         labelloc=t
         labeljust=c
         splines=spline
         nodesep=0.9
-        ranksep=2.0
+        ranksep=2.2
         compound=true
         bgcolor=white
         pad=0.8
@@ -26,22 +26,24 @@ digraph WlanTimerCamera {
     // ── GND-Symbole (je eines pro Cluster) ───────────────────────────────────
     node [shape=invtriangle style=filled fillcolor="#444444" fontcolor=white
           fontsize=8 width=0.4 height=0.28 margin="0.04,0.04" label="GND"]
-    gnd_src  gnd_timer  gnd_mcu
+    gnd_src  gnd_timer  gnd_mosfet
 
     // Normalen Node-Stil wiederherstellen
-    node [shape=box style="filled,rounded" fontsize=10 fontcolor=black margin="0.2,0.12"]
+    node [shape=box style="filled,rounded" fontsize=10 fontcolor=black
+          margin="0.2,0.12" width=1.0 height=0.6]
 
     // ── Zwischenpotenziale (Diamonds) ────────────────────────────────────────
     VCC_BATT [
-        label="VCC_BATT\n(3.6 V, ungeschaltet)"
+        label="VCC_BATT\n(3.6 V, Dauerplus)"
         shape=diamond
         fillcolor="#FFF3CD" color="#CC7700" penwidth=2.8
-        width=2.2 height=1.0 fontsize=10
+        width=2.1 height=1.0 fontsize=10
     ]
-    VCC_SWITCHED [
-        label="VCC_SWITCHED\n(3.6 V, geschaltet)"
+
+    GND_SW [
+        label="GND_SWITCHED\n(Q1 Drain — geschaltet)"
         shape=diamond
-        fillcolor="#FFF3CD" color="#CC7700" penwidth=2.8
+        fillcolor="#E3F2FD" color="#1565C0" penwidth=2.8
         width=2.2 height=1.0 fontsize=10
     ]
 
@@ -53,8 +55,9 @@ digraph WlanTimerCamera {
 
         BAT1 [
             label="BAT1\nER26500 Li-SOCl₂\n3.6 V / 8500 mAh"
-            shape=cylinder width=1.2 height=1.3
+            shape=cylinder width=1.3 height=1.4
             fillcolor="#FFF8E1" color="#E65100" penwidth=2
+            style=filled
         ]
         gnd_src
     }
@@ -66,29 +69,33 @@ digraph WlanTimerCamera {
         fontname="Arial" fontsize=11
 
         U1 [
-            label="U1 — TPL5110\nPower-Timer\nVDD | DRV | DONE | GND"
-            shape=box width=2.0 height=1.2
+            label="U1 — TPL5110\nPower-Timer IC\nVDD | GND | DRV | DONE"
+            shape=box width=2.2 height=1.3
             fillcolor="#FCE4EC" color="#880E4F" penwidth=2
+            style="filled,rounded"
         ]
         gnd_timer
     }
 
-    // ── Cluster: Schaltstufe ─────────────────────────────────────────────────
+    // ── Cluster: Schaltstufe (Low-Side) ─────────────────────────────────────
     subgraph cluster_switch {
-        label="Schaltstufe"
+        label="Schaltstufe (N-Kanal, Low-Side)"
         style=filled fillcolor="#E3F2FD" color="#1565C0" penwidth=2
         fontname="Arial" fontsize=11
 
         Q1 [
-            label="Q1 — Si2301\nP-Kanal MOSFET\nSource | Gate | Drain"
-            shape=box width=1.9 height=1.1
+            label="Q1 — AO3400\nN-Kanal MOSFET\nGate (Pin1) | Source (Pin2) | Drain (Pin3)"
+            shape=box width=2.4 height=1.2
             fillcolor="#E3F2FD" color="#1565C0" penwidth=2
+            style="filled,rounded"
         ]
-        R1 [
-            label="R1\n100 kΩ\n(Gate Pull-up)"
-            shape=box width=1.1 height=0.8
+        C1 [
+            label="C1\n470 µF / 6.3 V\nElko (Low-ESR)\n(parallel zur Kamera)"
+            shape=box width=1.5 height=1.0
             fillcolor="#E3F2FD" color="#1565C0"
+            style="filled,rounded"
         ]
+        gnd_mosfet
     }
 
     // ── Cluster: Recheneinheit & Kamera ──────────────────────────────────────
@@ -98,104 +105,119 @@ digraph WlanTimerCamera {
         fontname="Arial" fontsize=11
 
         M1 [
-            label="M1 — ESP32-CAM (AI-Thinker)\nOV2640 Kamera\nFlash-LED: GPIO 4\nVersorgung: 3.3 V | GND\nDONE-Signal: GPIO 13"
-            shape=box width=2.6 height=1.6
+            label="M1 — ESP32-CAM (AI-Thinker)\nOV2640 · Flash-LED GPIO4\n3.3V (Dauerpuls) | GND (geschaltet) | GPIO13 (DONE)"
+            shape=box width=2.8 height=1.5
             fillcolor="#E8F5E9" color="#2E7D32" penwidth=2
+            style="filled,rounded"
         ]
-        C1 [
-            label="C1\n470 µF / 6.3 V\n(Low-ESR Elko)"
-            shape=box width=1.1 height=0.8
-            fillcolor="#E8F5E9" color="#2E7D32"
-        ]
-        gnd_mcu
     }
 
-    // ── Kanten: Versorgungspfad ──────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — Versorgungspfad
+    // ════════════════════════════════════════════════════════════════════════════
 
-    // Batterie → VCC_BATT-Schiene
+    // Batterie Pluspol → VCC_BATT-Schiene
     BAT1 -> VCC_BATT [
-        taillabel="+"  headlabel=""
+        taillabel="+ (Pluspol)"  headlabel=""
         color="#E65100" penwidth=2.5 labelfontcolor="#E65100"
     ]
 
-    // VCC_BATT → U1 (Dauerstrom für Timer)
+    // Batterie Minuspol → lokales GND-Symbol
+    BAT1 -> gnd_src [
+        taillabel="- (Minuspol)"  headlabel=""
+        color="#444444" penwidth=2 labelfontcolor="#444444"
+    ]
+
+    // VCC_BATT → TPL5110 VDD (Dauerversorgung Timer)
     VCC_BATT -> U1 [
         taillabel=""  headlabel="VDD"
-        color="#E65100" penwidth=2.5 labelfontcolor="#E65100"
+        color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
     ]
 
-    // VCC_BATT → Q1 Source (Hauptstrom)
-    VCC_BATT -> Q1 [
-        taillabel=""  headlabel="Source"
-        color="#E65100" penwidth=2.5 labelfontcolor="#E65100"
+    // VCC_BATT → ESP32-CAM 3.3V  !! Dauerpuls — bypasses MOSFET !!
+    VCC_BATT -> M1 [
+        taillabel=""  headlabel="3.3V (Dauerpuls)"
+        color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
         constraint=false
     ]
 
-    // VCC_BATT → R1 Pin 1 (Pull-up Versorgung)
-    VCC_BATT -> R1 [
-        taillabel=""  headlabel="Pin 1"
-        color="#E65100" penwidth=1.5 labelfontcolor="#E65100"
+    // VCC_BATT → C1+  (Elko-Pluspol immer auf VCC_BATT)
+    VCC_BATT -> C1 [
+        taillabel=""  headlabel="+ (Elko)"
+        color="#CC7700" penwidth=1.8 labelfontcolor="#CC7700"
         constraint=false
     ]
 
-    // ── Kante: Steuersignal DRV ──────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — Steuersignal
+    // ════════════════════════════════════════════════════════════════════════════
+
+    // TPL5110 DRV → Q1 Gate  (HIGH = MOSFET ein; im Schlaf aktiv auf GND gezogen)
     U1 -> Q1 [
-        taillabel="DRV"  headlabel="Gate"
-        color="#1565C0" penwidth=2 labelfontcolor="#1565C0"
+        taillabel="DRV (Pin5)"  headlabel="Gate (Pin1)"
+        color="#1565C0" penwidth=2.5 labelfontcolor="#1565C0"
         label="TPL_DRV"
     ]
 
-    // R1 Pin 2 → Q1 Gate (Pull-up hält Gate auf VCC_BATT wenn DRV hochohmig)
-    R1 -> Q1 [
-        taillabel="Pin 2"  headlabel="Gate"
-        color="#1565C0" penwidth=1.5 style=dashed labelfontcolor="#1565C0"
-        label="Pull-up"
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — Geschaltete GND-Leitung
+    // ════════════════════════════════════════════════════════════════════════════
+
+    // Q1 Drain → GND_SWITCHED-Schiene
+    Q1 -> GND_SW [
+        taillabel="Drain (Pin3)"  headlabel=""
+        color="#1565C0" penwidth=2.5 labelfontcolor="#1565C0"
     ]
 
-    // ── Kanten: Geschalteter Pfad ────────────────────────────────────────────
-
-    // Q1 Drain → VCC_SWITCHED-Schiene
-    Q1 -> VCC_SWITCHED [
-        taillabel="Drain"  headlabel=""
-        color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
+    // GND_SWITCHED → C1-  (Elko-Minuspol geschaltet)
+    GND_SW -> C1 [
+        taillabel=""  headlabel="- (Elko)"
+        color="#1565C0" penwidth=1.8 labelfontcolor="#1565C0"
+        constraint=false
     ]
 
-    // VCC_SWITCHED → C1 (Glättung)
-    VCC_SWITCHED -> C1 [
-        taillabel=""  headlabel="+"
-        color="#CC7700" penwidth=2 labelfontcolor="#CC7700"
+    // GND_SWITCHED → ESP32-CAM GND  !! Kamera bekommt Masse erst wenn Q1 leitet !!
+    GND_SW -> M1 [
+        taillabel=""  headlabel="GND"
+        color="#1565C0" penwidth=2.5 labelfontcolor="#1565C0"
     ]
 
-    // VCC_SWITCHED → M1 (Versorgung ESP32-CAM)
-    VCC_SWITCHED -> M1 [
-        taillabel=""  headlabel="3.3V"
-        color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
-        label="VCC_SWITCHED"
-    ]
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — Feedback-Signal
+    // ════════════════════════════════════════════════════════════════════════════
 
-    // ── Kante: MCU_DONE-Signal (Feedback) ───────────────────────────────────
+    // ESP32-CAM GPIO13 → TPL5110 DONE  (Kamera signalisiert Ende der Aufnahme)
     M1 -> U1 [
-        taillabel="GPIO 13"  headlabel="DONE"
+        taillabel="GPIO13"  headlabel="DONE (Pin4)"
         color="#2E7D32" penwidth=2 labelfontcolor="#2E7D32"
         label="MCU_DONE" style=dashed
         constraint=false
     ]
 
-    // ── GND-Verbindungen ─────────────────────────────────────────────────────
-    BAT1 -> gnd_src [
-        taillabel="-"  headlabel=""
-        color="#444444" penwidth=1.5 labelfontcolor="#444444"
-    ]
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — GND-Netz (lokale Symbole verbinden)
+    // ════════════════════════════════════════════════════════════════════════════
+
+    // TPL5110 GND → lokales Symbol
     U1 -> gnd_timer [
         taillabel="GND"  headlabel=""
-        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+        color="#444444" penwidth=2 labelfontcolor="#444444"
     ]
-    C1 -> gnd_mcu [
-        taillabel="-"  headlabel=""
-        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+
+    // Q1 Source → lokales GND (gemeinsam mit Batterie-Minus)
+    Q1 -> gnd_mosfet [
+        taillabel="Source (Pin2)"  headlabel=""
+        color="#444444" penwidth=2 labelfontcolor="#444444"
     ]
-    M1 -> gnd_mcu [
-        taillabel="GND"  headlabel=""
-        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+
+    // GND-Netz-Verbindungen zwischen Clustern (gestrichelt = gleicher Knoten)
+    gnd_src -> gnd_timer [
+        color="#444444" penwidth=1.2 style=dashed
+        label="GND-Netz"
+        constraint=false
+    ]
+    gnd_timer -> gnd_mosfet [
+        color="#444444" penwidth=1.2 style=dashed
+        constraint=false
     ]
 }
