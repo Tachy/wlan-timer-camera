@@ -26,7 +26,7 @@ digraph WlanTimerCamera {
     // ── GND-Symbole (je eines pro Cluster) ───────────────────────────────────
     node [shape=invtriangle style=filled fillcolor="#444444" fontcolor=white
           fontsize=8 width=0.4 height=0.28 margin="0.04,0.04" label="GND"]
-    gnd_src  gnd_timer  gnd_mosfet
+    gnd_src  gnd_pre  gnd_mosfet
 
     // Normalen Node-Stil wiederherstellen
     node [shape=box style="filled,rounded" fontsize=10 fontcolor=black
@@ -62,19 +62,37 @@ digraph WlanTimerCamera {
         gnd_src
     }
 
-    // ── Cluster: Power-Timer ─────────────────────────────────────────────────
-    subgraph cluster_timer {
-        label="Power-Timer"
+    // ── Cluster: Vorschaltplatine (Streifenrasterplatine) ───────────────────
+    subgraph cluster_pre {
+        label="Vorschaltplatine\n(Streifenrasterplatine)"
         style=filled fillcolor="#FCE4EC" color="#880E4F" penwidth=2
         fontname="Arial" fontsize=11
 
+        C2 [
+            label="C2\n4700 µF\nPuffer\n(VCC ‖ GND)"
+            shape=box width=1.3 height=1.0
+            fillcolor="#FCE4EC" color="#880E4F"
+            style="filled,rounded"
+        ]
         U1 [
-            label="U1 — TPL5110\nPower-Timer IC\nVDD | GND | DRV (Pin4) | DONE (Pin5)"
-            shape=box width=2.2 height=1.3
+            label="U1 — TPL5110\nPower-Timer IC\nVDD | GND | DRV (Pin4)\nDELAY | DONE (Pin5)"
+            shape=box width=2.2 height=1.4
             fillcolor="#FCE4EC" color="#880E4F" penwidth=2
             style="filled,rounded"
         ]
-        gnd_timer
+        R1 [
+            label="R1\n47 kΩ\nDELAY → GND\n(Zeitkonstante)"
+            shape=box width=1.3 height=1.0
+            fillcolor="#FCE4EC" color="#880E4F"
+            style="filled,rounded"
+        ]
+        R2 [
+            label="R2\n10 kΩ\nDONE → GND\n(Pull-down)"
+            shape=box width=1.3 height=1.0
+            fillcolor="#FCE4EC" color="#880E4F"
+            style="filled,rounded"
+        ]
+        gnd_pre
     }
 
     // ── Cluster: Schaltstufe (Low-Side) ─────────────────────────────────────
@@ -128,6 +146,12 @@ digraph WlanTimerCamera {
         color="#444444" penwidth=2 labelfontcolor="#444444"
     ]
 
+    // VCC_BATT → C2+ (Pufferkondensator auf Vorschaltplatine)
+    VCC_BATT -> C2 [
+        taillabel=""  headlabel="+"
+        color="#CC7700" penwidth=2.0 labelfontcolor="#CC7700"
+    ]
+
     // VCC_BATT → TPL5110 VDD (Dauerversorgung Timer)
     VCC_BATT -> U1 [
         taillabel=""  headlabel="VDD"
@@ -146,6 +170,48 @@ digraph WlanTimerCamera {
         taillabel=""  headlabel="+ (Elko)"
         color="#CC7700" penwidth=1.8 labelfontcolor="#CC7700"
         constraint=false
+    ]
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — Vorschaltplatine intern
+    // ════════════════════════════════════════════════════════════════════════════
+
+    // C2- → lokales GND
+    C2 -> gnd_pre [
+        taillabel="-"  headlabel=""
+        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    ]
+
+    // U1 DELAY → R1 Pin1 (Timer-Zeitkonstante)
+    U1 -> R1 [
+        taillabel="DELAY"  headlabel="Pin1"
+        color="#880E4F" penwidth=1.8 labelfontcolor="#880E4F"
+        label="TPL_DELAY"
+    ]
+
+    // R1 Pin2 → lokales GND
+    R1 -> gnd_pre [
+        taillabel="Pin2"  headlabel=""
+        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    ]
+
+    // U1 DONE → R2 Pin1 (Pull-down, verhindert floatenden Eingang)
+    U1 -> R2 [
+        taillabel="DONE"  headlabel="Pin1"
+        color="#880E4F" penwidth=1.8 labelfontcolor="#880E4F"
+        label="DONE\nPull-down"
+    ]
+
+    // R2 Pin2 → lokales GND
+    R2 -> gnd_pre [
+        taillabel="Pin2"  headlabel=""
+        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    ]
+
+    // U1 GND → lokales GND
+    U1 -> gnd_pre [
+        taillabel="GND"  headlabel=""
+        color="#444444" penwidth=2 labelfontcolor="#444444"
     ]
 
     // ════════════════════════════════════════════════════════════════════════════
@@ -195,14 +261,8 @@ digraph WlanTimerCamera {
     ]
 
     // ════════════════════════════════════════════════════════════════════════════
-    // KANTEN — GND-Netz (lokale Symbole verbinden)
+    // KANTEN — GND-Netz
     // ════════════════════════════════════════════════════════════════════════════
-
-    // TPL5110 GND → lokales Symbol
-    U1 -> gnd_timer [
-        taillabel="GND"  headlabel=""
-        color="#444444" penwidth=2 labelfontcolor="#444444"
-    ]
 
     // Q1 Source → lokales GND (gemeinsam mit Batterie-Minus)
     Q1 -> gnd_mosfet [
@@ -211,12 +271,12 @@ digraph WlanTimerCamera {
     ]
 
     // GND-Netz-Verbindungen zwischen Clustern (gestrichelt = gleicher Knoten)
-    gnd_src -> gnd_timer [
+    gnd_src -> gnd_pre [
         color="#444444" penwidth=1.2 style=dashed
         label="GND-Netz"
         constraint=false
     ]
-    gnd_timer -> gnd_mosfet [
+    gnd_pre -> gnd_mosfet [
         color="#444444" penwidth=1.2 style=dashed
         constraint=false
     ]
