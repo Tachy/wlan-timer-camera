@@ -11,6 +11,31 @@
 
 static const char *TAG = "main";
 
+static void capture_cycle(void)
+{
+    camera_fb_t *fb = NULL;
+    if (camera_capture(&fb) != ESP_OK) {
+        ESP_LOGE(TAG, "Bildaufnahme fehlgeschlagen");
+        return;
+    }
+
+    int rssi_pct = 0;
+    if (wifi_connect(&rssi_pct) != ESP_OK) {
+        ESP_LOGE(TAG, "WLAN fehlgeschlagen — Bild wird verworfen");
+        camera_fb_return(fb);
+        return;
+    }
+
+    if (scp_upload(fb->buf, fb->len, IMAGE_FILENAME) != ESP_OK)
+        ESP_LOGE(TAG, "SCP-Upload fehlgeschlagen");
+
+    if (ssh_exec_append_log(rssi_pct) != ESP_OK)
+        ESP_LOGW(TAG, "Signal-Log fehlgeschlagen");
+
+    camera_fb_return(fb);
+    wifi_disconnect();
+}
+
 void app_main(void)
 {
     ESP_LOGI(TAG, "=== WLAN Timer-Kamera gestartet ===");
@@ -27,32 +52,7 @@ void app_main(void)
     }
 
     for (;;) {
-        // 1. Bild aufnehmen
-        camera_fb_t *fb = NULL;
-        if (camera_capture(&fb) != ESP_OK) {
-            ESP_LOGE(TAG, "Bildaufnahme fehlgeschlagen");
-            goto next;
-        }
-
-        // 2. WLAN verbinden
-        int rssi_pct = 0;
-        if (wifi_connect(&rssi_pct) != ESP_OK) {
-            ESP_LOGE(TAG, "WLAN fehlgeschlagen — Bild wird verworfen");
-            camera_fb_return(fb);
-            goto next;
-        }
-
-        // 3. Bild hochladen + Signal-Log
-        if (scp_upload(fb->buf, fb->len, IMAGE_FILENAME) != ESP_OK)
-            ESP_LOGE(TAG, "SCP-Upload fehlgeschlagen");
-
-        if (ssh_exec_append_log(rssi_pct) != ESP_OK)
-            ESP_LOGW(TAG, "Signal-Log fehlgeschlagen");
-
-        camera_fb_return(fb);
-        wifi_disconnect();
-
-next:
+        capture_cycle();
         vTaskDelay(pdMS_TO_TICKS(CAPTURE_INTERVAL_MS));
     }
 }
