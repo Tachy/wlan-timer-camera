@@ -80,6 +80,11 @@ esp_err_t camera_init(void)
     return err;
 }
 
+void camera_deinit(void)
+{
+    esp_camera_deinit();
+}
+
 esp_err_t camera_capture(camera_fb_t **fb)
 {
     // LED einschalten und warten, bis der Sensor mindestens einen

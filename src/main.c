@@ -60,9 +60,11 @@ void app_main(void)
 
     for (;;) {
         capture_cycle();
+        camera_deinit();
         gpio_hold_en(PIN_FLASH_LED);
         esp_sleep_enable_timer_wakeup((uint64_t)CAPTURE_INTERVAL_MS * 1000ULL);
         esp_light_sleep_start();
         gpio_hold_dis(PIN_FLASH_LED);
+        camera_init();
     }
 }
