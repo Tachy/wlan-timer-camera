@@ -3,7 +3,6 @@
 #include "esp_log.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
-#include "nvs_flash.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 
@@ -33,17 +32,8 @@ static void on_ip_event(void *arg, esp_event_base_t base, int32_t id, void *data
     }
 }
 
-esp_err_t wifi_connect(int *rssi_pct_out)
+esp_err_t wifi_init(void)
 {
-    *rssi_pct_out = 0;
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ESP_ERROR_CHECK(nvs_flash_init());
-    }
-
-    s_events = xEventGroupCreate();
-
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_sta();
@@ -51,11 +41,19 @@ esp_err_t wifi_connect(int *rssi_pct_out)
     wifi_init_config_t init_cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&init_cfg));
 
-    esp_event_handler_instance_t h_wifi, h_ip;
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        WIFI_EVENT, ESP_EVENT_ANY_ID, on_wifi_event, NULL, &h_wifi));
+        WIFI_EVENT, ESP_EVENT_ANY_ID, on_wifi_event, NULL, NULL));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        IP_EVENT, IP_EVENT_STA_GOT_IP, on_ip_event, NULL, &h_ip));
+        IP_EVENT, IP_EVENT_STA_GOT_IP, on_ip_event, NULL, NULL));
+
+    s_events = xEventGroupCreate();
+    return ESP_OK;
+}
+
+esp_err_t wifi_connect(int *rssi_pct_out)
+{
+    *rssi_pct_out = 0;
+    xEventGroupClearBits(s_events, CONNECTED_BIT | FAIL_BIT);
 
     wifi_config_t wifi_cfg = {
         .sta = {
@@ -91,7 +89,4 @@ esp_err_t wifi_connect(int *rssi_pct_out)
 void wifi_disconnect(void)
 {
     esp_wifi_stop();
-    esp_wifi_deinit();
-    esp_event_loop_delete_default();
-    esp_netif_deinit();
 }

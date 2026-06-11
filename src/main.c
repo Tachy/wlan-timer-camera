@@ -2,6 +2,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
+#include "esp_sleep.h"
+#include "driver/gpio.h"
 #include "nvs_flash.h"
 
 #include "config.h"
@@ -51,8 +53,16 @@ void app_main(void)
         return;
     }
 
+    if (wifi_init() != ESP_OK) {
+        ESP_LOGE(TAG, "WLAN-Init fehlgeschlagen — Neustart nötig");
+        return;
+    }
+
     for (;;) {
         capture_cycle();
-        vTaskDelay(pdMS_TO_TICKS(CAPTURE_INTERVAL_MS));
+        gpio_hold_en(PIN_FLASH_LED);
+        esp_sleep_enable_timer_wakeup((uint64_t)CAPTURE_INTERVAL_MS * 1000ULL);
+        esp_light_sleep_start();
+        gpio_hold_dis(PIN_FLASH_LED);
     }
 }
