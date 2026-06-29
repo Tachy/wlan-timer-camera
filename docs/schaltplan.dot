@@ -2,173 +2,213 @@ digraph WlanTimerCamera {
     graph [
         rankdir=LR
         fontname="Arial"
-        fontsize=14
+        fontsize=11
         label="WLAN Timer Camera — Schaltplan\nTPL5110 Power-Timer · AO3400 N-Kanal Low-Side-Switch · ESP32-CAM"
         labelloc=t
         labeljust=c
         splines=spline
-        nodesep=0.9
-        ranksep=2.2
+        nodesep=0.45
+        ranksep=1.3
         compound=true
         bgcolor=white
-        pad=0.8
+        pad=0.3
+        size="11.5,7.8"
+        ratio=compress
     ]
-    node [fontname="Arial" fontsize=10 style="filled,rounded" shape=box margin="0.2,0.12"]
+    node [fontname="Arial" fontsize=9 style="filled,rounded" shape=box margin="0.12,0.08"]
     edge [
         fontname="Arial"
-        fontsize=9
-        penwidth=1.5
-        labelfontsize=9
-        labeldistance=2.4
+        fontsize=8
+        penwidth=1.4
+        labelfontsize=8
+        labeldistance=2.0
         labelangle=25
     ]
 
-    // ── GND-Symbole (je eines pro Cluster) ───────────────────────────────────
+    // ── GND-Symbol (nur intern in Vorschaltplatine) ───────────────────────────
     node [shape=invtriangle style=filled fillcolor="#444444" fontcolor=white
           fontsize=8 width=0.4 height=0.28 margin="0.04,0.04" label="GND"]
-    gnd_src  gnd_pre  gnd_mosfet
+    gnd_vorschalt
 
     // Normalen Node-Stil wiederherstellen
     node [shape=box style="filled,rounded" fontsize=10 fontcolor=black
-          margin="0.2,0.12" width=1.0 height=0.6]
+          margin="0.2,0.12" width=1.0 height=0.6 label=""]
 
-    // ── Zwischenpotenziale (Diamonds) ────────────────────────────────────────
-    VCC_BATT [
-        label="VCC_BATT\n(3.6 V, Dauerplus)"
-        shape=diamond
-        fillcolor="#FFF3CD" color="#CC7700" penwidth=2.8
-        width=2.1 height=1.0 fontsize=10
-    ]
 
-    GND_SW [
-        label="GND_SWITCHED\n(Q1 Drain — geschaltet)"
-        shape=diamond
-        fillcolor="#E3F2FD" color="#1565C0" penwidth=2.8
-        width=2.2 height=1.0 fontsize=10
-    ]
-
-    // ── Cluster: Energiequelle ───────────────────────────────────────────────
-    subgraph cluster_source {
-        label="Energiequelle"
+    // ── Cluster: Stromversorgung ──────────────────────────────────────────────
+    //    Außenanschluss: 2 Ausgangspins (3,3V und GND)
+    subgraph cluster_psu {
+        label="Stromversorgung"
         style=filled fillcolor="#FFF8E1" color="#E65100" penwidth=2
         fontname="Arial" fontsize=11
 
-        BAT1 [
-            label="BAT1\nER26500 Li-SOCl₂\n3.6 V / 8500 mAh"
-            shape=cylinder width=1.3 height=1.4
-            fillcolor="#FFF8E1" color="#E65100" penwidth=2
+        // ── 2 Ausgangspins ────────────────────────────────────────────────────
+        node [shape=box style="filled" fillcolor="#ECEFF1" color="#546E7A"
+              penwidth=1.6 fontsize=8 fontname="Courier New"
+              width=0.62 height=0.32 margin="0.05,0.04"]
+        psu_3V3 [label="3,3 V"]
+        psu_GND [label="GND"]
+
+        // ── Interne Bauteile ──────────────────────────────────────────────────
+        node [shape=box style="filled,rounded" fontsize=9 fontname="Arial"
+              fontcolor=black margin="0.12,0.08" width=1.0 height=0.5]
+        PSU1 [
+            label="PSU1\n12 V Netzteil\n(Konstantspannung)"
+            shape=cylinder width=1.3 height=1.2
+            fillcolor="#FFCCBC" color="#E65100" penwidth=2
             style=filled
         ]
-        gnd_src
-    }
-
-    // ── Cluster: Vorschaltplatine (Streifenrasterplatine) ───────────────────
-    subgraph cluster_pre {
-        label="Vorschaltplatine\n(Streifenrasterplatine)"
-        style=filled fillcolor="#FCE4EC" color="#880E4F" penwidth=2
-        fontname="Arial" fontsize=11
-
-        C2 [
-            label="C2\n4700 µF\nPuffer\n(VCC ‖ GND)"
-            shape=box width=1.3 height=1.0
-            fillcolor="#FCE4EC" color="#880E4F"
-            style="filled,rounded"
-        ]
-        U1 [
-            label="U1 — TPL5110\nPower-Timer IC\nVDD | GND | DRV (Pin4)\nDELAY | DONE (Pin5)"
-            shape=box width=2.2 height=1.4
+        U2 [
+            label="U2: QUARKZMAN\nStep-Down\n12 V → 3,3 V / 3 A"
+            shape=box width=2.0 height=1.1
             fillcolor="#FCE4EC" color="#880E4F" penwidth=2
             style="filled,rounded"
         ]
-        R1 [
-            label="R1\n47 kΩ\nDELAY → GND\n(Zeitkonstante)"
-            shape=box width=1.3 height=1.0
-            fillcolor="#FCE4EC" color="#880E4F"
-            style="filled,rounded"
-        ]
-        R2 [
-            label="R2\n10 kΩ\nDONE → GND\n(Pull-down)"
-            shape=box width=1.3 height=1.0
-            fillcolor="#FCE4EC" color="#880E4F"
-            style="filled,rounded"
-        ]
-        gnd_pre
     }
 
-    // ── Cluster: Schaltstufe (Low-Side) ─────────────────────────────────────
-    subgraph cluster_switch {
-        label="Schaltstufe (N-Kanal, Low-Side)"
+    // ── Cluster: Vorschaltplatine mit TPL5110 ─────────────────────────────────
+    //    Außenanschluss: 4 Steckpins (wie am Timer-IC beschriftet)
+    //    DELAY wird intern verdrahtet – kein Pin nach außen
+    subgraph cluster_vorschalt {
+        label="Vorschaltplatine (Streifenrasterplatine)\nmit TPL5110 Power-Timer"
+        style=filled fillcolor="#F3E5F5" color="#6A1B9A" penwidth=2
+        fontname="Arial" fontsize=11
+
+        // ── 4 Außen-Steckpins ────────────────────────────────────────────────
+        node [shape=box style="filled" fillcolor="#ECEFF1" color="#546E7A"
+              penwidth=1.6 fontsize=8 fontname="Courier New"
+              width=0.62 height=0.32 margin="0.05,0.04"]
+        tpl_VDD  [label="VDD"]
+        tpl_GND  [label="GND"]
+        tpl_DRV  [label="DRV\n(Pin 4)"]
+        tpl_DONE [label="DONE\n(Pin 5)"]
+
+        // ── Interne Bauteile ──────────────────────────────────────────────────
+        node [shape=box style="filled,rounded" fontsize=9 fontname="Arial"
+              fontcolor=black margin="0.12,0.08" width=1.0 height=0.5]
+        C2 [
+            label="C2\n4700 µF\nPufferkondensator"
+            width=1.3 height=0.9
+            fillcolor="#E1BEE7" color="#6A1B9A"
+        ]
+        R1 [
+            label="R1  47 kΩ\nDELAY → GND\n(6,5 min)"
+            width=1.3 height=0.9
+            fillcolor="#E1BEE7" color="#6A1B9A"
+        ]
+        R2 [
+            label="R2  10 kΩ\nDONE Pull-down"
+            width=1.3 height=0.8
+            fillcolor="#E1BEE7" color="#6A1B9A"
+        ]
+        U1 [
+            label="U1 — TPL5110\nPower-Timer IC\nDRV aktiv GND\nim Schlaf → MOSFET AUS"
+            shape=box width=2.0 height=1.4
+            fillcolor="#CE93D8" color="#6A1B9A" penwidth=2
+            style="filled,rounded"
+        ]
+
+        gnd_vorschalt
+    }
+
+    // ── Cluster: AO3400 Breakoutplatine ──────────────────────────────────────
+    //    Außenanschluss ausschließlich über Pin 1, 2, 3
+    subgraph cluster_mosfet {
+        label="AO3400 Breakoutplatine\n(N-Kanal MOSFET, Low-Side)"
         style=filled fillcolor="#E3F2FD" color="#1565C0" penwidth=2
         fontname="Arial" fontsize=11
 
+        // ── 3 Anschluss-Pins ─────────────────────────────────────────────────
+        node [shape=box style="filled" fillcolor="#ECEFF1" color="#546E7A"
+              penwidth=1.6 fontsize=8 fontname="Courier New"
+              width=0.62 height=0.32 margin="0.05,0.04"]
+        q1_p1 [label="Pin 1\n(Gate)"]
+        q1_p2 [label="Pin 2\n(Source)"]
+        q1_p3 [label="Pin 3\n(Drain)"]
+
+        // ── MOSFET ───────────────────────────────────────────────────────────
+        node [shape=box style="filled,rounded" fontsize=9 fontname="Arial"
+              fontcolor=black margin="0.12,0.08"]
         Q1 [
-            label="Q1 — AO3400\nN-Kanal MOSFET\nGate (Pin1) | Source (Pin2) | Drain (Pin3)"
-            shape=box width=2.4 height=1.2
-            fillcolor="#E3F2FD" color="#1565C0" penwidth=2
-            style="filled,rounded"
+            label="Q1 — AO3400\nN-Kanal MOSFET\n(SOT-23)"
+            width=1.7 height=1.0
+            fillcolor="#BBDEFB" color="#1565C0" penwidth=2
         ]
-        gnd_mosfet
     }
 
     // ── Cluster: Recheneinheit & Kamera ──────────────────────────────────────
+    //    Außenanschluss: 2 Pins (3,3V und GND geschaltet); C1 intern
     subgraph cluster_mcu {
         label="Recheneinheit & Kamera"
         style=filled fillcolor="#E8F5E9" color="#2E7D32" penwidth=2
         fontname="Arial" fontsize=11
 
+        // ── 2 Außen-Anschlusspins ─────────────────────────────────────────────
+        node [shape=box style="filled" fillcolor="#ECEFF1" color="#546E7A"
+              penwidth=1.6 fontsize=8 fontname="Courier New"
+              width=0.62 height=0.32 margin="0.05,0.04"]
+        cam_3V3  [label="3,3 V"]
+        cam_GND  [label="GND\n(geschaltet)"]
+        cam_DONE [label="GPIO 13\n(DONE)"]
+
+        // ── Interne Bauteile ──────────────────────────────────────────────────
+        node [shape=box style="filled,rounded" fontsize=9 fontname="Arial"
+              fontcolor=black margin="0.12,0.08"]
         M1 [
-            label="M1 — ESP32-CAM (AI-Thinker)\nOV2640 · Flash-LED GPIO4\n3.3V (Dauerpuls) | GND (geschaltet) | GPIO13 (DONE)"
-            shape=box width=2.8 height=1.5
-            fillcolor="#E8F5E9" color="#2E7D32" penwidth=2
+            label="M1 — ESP32-CAM\n(AI-Thinker / OV2640)\nBlitz-LED GPIO 4"
+            shape=box width=2.2 height=1.1
+            fillcolor="#A5D6A7" color="#2E7D32" penwidth=2
             style="filled,rounded"
         ]
         C1 [
-            label="C1\n470 µF / 6.3 V\nElko (Low-ESR)\n(parallel zur Kamera)"
-            shape=box width=1.5 height=1.0
-            fillcolor="#E8F5E9" color="#2E7D32"
+            label="C1\n470 µF / 6,3 V\nElko (Low-ESR)"
+            shape=box width=1.3 height=0.9
+            fillcolor="#C8E6C9" color="#2E7D32"
             style="filled,rounded"
         ]
     }
 
     // ════════════════════════════════════════════════════════════════════════════
-    // KANTEN — Versorgungspfad
+    // KANTEN — Stromversorgung intern: PSU1 → U2 → Ausgangspins
     // ════════════════════════════════════════════════════════════════════════════
 
-    // Batterie Pluspol → VCC_BATT-Schiene
-    BAT1 -> VCC_BATT [
-        taillabel="+ (Pluspol)"  headlabel=""
+    PSU1 -> U2 [
+        taillabel="+ (12 V)"  headlabel="VIN"
         color="#E65100" penwidth=2.5 labelfontcolor="#E65100"
+        label="12 V"
     ]
-
-    // Batterie Minuspol → lokales GND-Symbol
-    BAT1 -> gnd_src [
-        taillabel="- (Minuspol)"  headlabel=""
-        color="#444444" penwidth=2 labelfontcolor="#444444"
-    ]
-
-    // VCC_BATT → C2+ (Pufferkondensator auf Vorschaltplatine)
-    VCC_BATT -> C2 [
-        taillabel=""  headlabel="+"
-        color="#CC7700" penwidth=2.0 labelfontcolor="#CC7700"
-    ]
-
-    // VCC_BATT → TPL5110 VDD (Dauerversorgung Timer)
-    VCC_BATT -> U1 [
-        taillabel=""  headlabel="VDD"
+    U2 -> psu_3V3 [
+        taillabel="VOUT"  headlabel="3,3 V"
         color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
     ]
+    PSU1 -> psu_GND [
+        taillabel="- (GND)"  headlabel=""
+        color="#444444" penwidth=1.8 labelfontcolor="#444444"
+    ]
+    U2 -> psu_GND [
+        taillabel="GND"  headlabel=""
+        color="#444444" penwidth=1.8 labelfontcolor="#444444"
+    ]
 
-    // VCC_BATT → ESP32-CAM 3.3V  !! Dauerpuls — bypasses MOSFET !!
-    VCC_BATT -> M1 [
-        taillabel=""  headlabel="3.3V (Dauerpuls)"
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — PSU-Pins verteilen an Vorschaltplatine und Kamera
+    // ════════════════════════════════════════════════════════════════════════════
+
+    // 3,3 V → Vorschaltplatine VDD-Pin
+    psu_3V3 -> tpl_VDD [
+        taillabel="3,3 V"  headlabel="VDD"
+        color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
+    ]
+    // 3,3 V → Kamera 3,3V-Pin (Dauerpuls, direkt vom PSU)
+    psu_3V3 -> cam_3V3 [
+        taillabel="3,3 V"  headlabel="3,3 V"
         color="#CC7700" penwidth=2.5 labelfontcolor="#CC7700"
         constraint=false
     ]
-
-    // VCC_BATT → C1+  (Elko-Pluspol immer auf VCC_BATT)
-    VCC_BATT -> C1 [
-        taillabel=""  headlabel="+ (Elko)"
-        color="#CC7700" penwidth=1.8 labelfontcolor="#CC7700"
+    // GND → Vorschaltplatine GND-Pin
+    psu_GND -> tpl_GND [
+        taillabel="GND"  headlabel="GND"
+        color="#444444" penwidth=2.0 labelfontcolor="#444444"
         constraint=false
     ]
 
@@ -176,108 +216,132 @@ digraph WlanTimerCamera {
     // KANTEN — Vorschaltplatine intern
     // ════════════════════════════════════════════════════════════════════════════
 
-    // C2- → lokales GND
-    C2 -> gnd_pre [
+    // VDD-Pin: versorgt Timer-IC und Pufferkondensator
+    tpl_VDD -> U1 [
+        taillabel=""  headlabel="VDD"
+        color="#CC7700" penwidth=2.0 labelfontcolor="#CC7700"
+    ]
+    tpl_VDD -> C2 [
+        taillabel=""  headlabel="+"
+        color="#CC7700" penwidth=1.8 labelfontcolor="#CC7700"
+    ]
+
+    // GND-Pin: versorgt interne GND-Ebene
+    tpl_GND -> gnd_vorschalt [
+        color="#444444" penwidth=2.0
+    ]
+    U1 -> gnd_vorschalt [
+        taillabel="GND"  headlabel=""
+        color="#444444" penwidth=1.8 labelfontcolor="#444444"
+    ]
+    C2 -> gnd_vorschalt [
         taillabel="-"  headlabel=""
         color="#444444" penwidth=1.5 labelfontcolor="#444444"
     ]
+    R1 -> gnd_vorschalt [
+        taillabel="Pin 2"  headlabel=""
+        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    ]
+    R2 -> gnd_vorschalt [
+        taillabel="Pin 2"  headlabel=""
+        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    ]
 
-    // U1 DELAY → R1 Pin1 (Timer-Zeitkonstante)
+    // GND sternförmig: PSU GND-Pin direkt → MOSFET Pin 2 (Source)
+    psu_GND -> q1_p2 [
+        taillabel="GND"  headlabel="Source"
+        color="#444444" penwidth=2.0 labelfontcolor="#444444"
+        constraint=false
+    ]
+
+    // DELAY: rein intern (kein Außen-Pin)
     U1 -> R1 [
-        taillabel="DELAY"  headlabel="Pin1"
-        color="#880E4F" penwidth=1.8 labelfontcolor="#880E4F"
-        label="TPL_DELAY"
+        taillabel="DELAY"  headlabel="Pin 1"
+        color="#6A1B9A" penwidth=1.8 labelfontcolor="#6A1B9A"
+        label="TPL_DELAY (intern)"
     ]
 
-    // R1 Pin2 → lokales GND
-    R1 -> gnd_pre [
-        taillabel="Pin2"  headlabel=""
-        color="#444444" penwidth=1.5 labelfontcolor="#444444"
+    // DONE-Pin: R2 Pull-down intern, Eingang von außen (MCU_DONE)
+    R2 -> tpl_DONE [
+        taillabel="Pin 1"  headlabel=""
+        color="#6A1B9A" penwidth=1.5 labelfontcolor="#6A1B9A"
+        label="10 kΩ Pull-down"
+    ]
+    tpl_DONE -> U1 [
+        taillabel=""  headlabel="DONE (Pin 5)"
+        color="#6A1B9A" penwidth=1.8 labelfontcolor="#6A1B9A"
     ]
 
-    // U1 DONE → R2 Pin1 (Pull-down, verhindert floatenden Eingang)
-    U1 -> R2 [
-        taillabel="DONE"  headlabel="Pin1"
-        color="#880E4F" penwidth=1.8 labelfontcolor="#880E4F"
-        label="DONE\nPull-down"
-    ]
-
-    // R2 Pin2 → lokales GND
-    R2 -> gnd_pre [
-        taillabel="Pin2"  headlabel=""
-        color="#444444" penwidth=1.5 labelfontcolor="#444444"
-    ]
-
-    // U1 GND → lokales GND
-    U1 -> gnd_pre [
-        taillabel="GND"  headlabel=""
-        color="#444444" penwidth=2 labelfontcolor="#444444"
-    ]
-
-    // ════════════════════════════════════════════════════════════════════════════
-    // KANTEN — Steuersignal
-    // ════════════════════════════════════════════════════════════════════════════
-
-    // TPL5110 DRV → Q1 Gate  (HIGH = MOSFET ein; im Schlaf aktiv auf GND gezogen)
-    U1 -> Q1 [
-        taillabel="DRV (Pin4)"  headlabel="Gate (Pin1)"
+    // DRV-Pin: Ausgang des Timers → MOSFET Gate
+    U1 -> tpl_DRV [
+        taillabel="DRV (Pin 4)"  headlabel=""
         color="#1565C0" penwidth=2.5 labelfontcolor="#1565C0"
         label="TPL_DRV"
     ]
-
-    // ════════════════════════════════════════════════════════════════════════════
-    // KANTEN — Geschaltete GND-Leitung
-    // ════════════════════════════════════════════════════════════════════════════
-
-    // Q1 Drain → GND_SWITCHED-Schiene
-    Q1 -> GND_SW [
-        taillabel="Drain (Pin3)"  headlabel=""
+    tpl_DRV -> q1_p1 [
+        taillabel="DRV out"  headlabel="Gate"
         color="#1565C0" penwidth=2.5 labelfontcolor="#1565C0"
     ]
 
-    // GND_SWITCHED → C1-  (Elko-Minuspol geschaltet)
-    GND_SW -> C1 [
-        taillabel=""  headlabel="- (Elko)"
-        color="#1565C0" penwidth=1.8 labelfontcolor="#1565C0"
-        constraint=false
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — MOSFET-Breakout intern
+    // ════════════════════════════════════════════════════════════════════════════
+
+    q1_p1 -> Q1 [
+        taillabel=""  headlabel="Gate"
+        color="#1565C0" penwidth=2.0 labelfontcolor="#1565C0"
+    ]
+    q1_p2 -> Q1 [
+        taillabel=""  headlabel="Source"
+        color="#444444" penwidth=2.0 labelfontcolor="#444444"
+    ]
+    Q1 -> q1_p3 [
+        taillabel="Drain"  headlabel=""
+        color="#444444" penwidth=2.0 labelfontcolor="#444444"
     ]
 
-    // GND_SWITCHED → ESP32-CAM GND  !! Kamera bekommt Masse erst wenn Q1 leitet !!
-    GND_SW -> M1 [
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — MOSFET Pin 3 → GND_SWITCHED → Kamera GND-Pin
+    // ════════════════════════════════════════════════════════════════════════════
+
+    q1_p3 -> cam_GND [
+        taillabel="Drain out"  headlabel="GND"
+        color="#444444" penwidth=2.5 labelfontcolor="#444444"
+    ]
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // KANTEN — Kamera intern: Pins verteilen an M1 und C1
+    // ════════════════════════════════════════════════════════════════════════════
+
+    cam_3V3 -> M1 [
+        taillabel=""  headlabel="3,3 V"
+        color="#CC7700" penwidth=2.0 labelfontcolor="#CC7700"
+    ]
+    cam_3V3 -> C1 [
+        taillabel=""  headlabel="+"
+        color="#CC7700" penwidth=1.6 labelfontcolor="#CC7700"
+    ]
+    cam_GND -> M1 [
         taillabel=""  headlabel="GND"
-        color="#1565C0" penwidth=2.5 labelfontcolor="#1565C0"
+        color="#444444" penwidth=2.0 labelfontcolor="#444444"
+    ]
+    cam_GND -> C1 [
+        taillabel=""  headlabel="-"
+        color="#444444" penwidth=1.6 labelfontcolor="#444444"
     ]
 
     // ════════════════════════════════════════════════════════════════════════════
-    // KANTEN — Feedback-Signal
+    // KANTEN — Feedback: ESP32-CAM GPIO 13 → DONE-Pin (Vorschaltplatine)
     // ════════════════════════════════════════════════════════════════════════════
 
-    // ESP32-CAM GPIO13 → TPL5110 DONE  (Kamera signalisiert Ende der Aufnahme)
-    M1 -> U1 [
-        taillabel="GPIO13"  headlabel="DONE (Pin5)"
+    M1 -> cam_DONE [
+        taillabel="GPIO 13"  headlabel=""
+        color="#2E7D32" penwidth=2 labelfontcolor="#2E7D32"
+    ]
+    cam_DONE -> tpl_DONE [
+        taillabel=""  headlabel="DONE"
         color="#2E7D32" penwidth=2 labelfontcolor="#2E7D32"
         label="MCU_DONE" style=dashed
-        constraint=false
-    ]
-
-    // ════════════════════════════════════════════════════════════════════════════
-    // KANTEN — GND-Netz
-    // ════════════════════════════════════════════════════════════════════════════
-
-    // Q1 Source → lokales GND (gemeinsam mit Batterie-Minus)
-    Q1 -> gnd_mosfet [
-        taillabel="Source (Pin2)"  headlabel=""
-        color="#444444" penwidth=2 labelfontcolor="#444444"
-    ]
-
-    // GND-Netz-Verbindungen zwischen Clustern (gestrichelt = gleicher Knoten)
-    gnd_src -> gnd_pre [
-        color="#444444" penwidth=1.2 style=dashed
-        label="GND-Netz"
-        constraint=false
-    ]
-    gnd_pre -> gnd_mosfet [
-        color="#444444" penwidth=1.2 style=dashed
         constraint=false
     ]
 }

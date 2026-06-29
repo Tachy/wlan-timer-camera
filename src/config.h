@@ -21,12 +21,9 @@
 #define SCP_TIMEOUT_SEC     30
 
 // ── Hardware-Pins (ESP32-CAM AI-Thinker) ─────────────────────────────────────
+#define PIN_DONE            13  // GPIO 13 → DONE-Signal an TPL5110
 #define PIN_FLASH_LED       4   // interne Blitz-LED (aktiv HIGH)
-
-// ── Dauerbetrieb ─────────────────────────────────────────────────────────────
-#define CAPTURE_INTERVAL_MS 60000  // 1 Minute zwischen Aufnahmen
 
 // ── Kamera-Einstellungen ─────────────────────────────────────────────────────
 #define CAM_FRAME_SIZE      FRAMESIZE_UXGA   // 1600 × 1200
 #define CAM_JPEG_QUALITY    12               // 0–63, niedriger = besser
-
