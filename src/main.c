@@ -14,6 +14,24 @@ static const char *TAG = "main";
 
 // ── Hilfsfunktionen ──────────────────────────────────────────────────────────
 
+static void led_blink_error(int count)
+{
+    gpio_config_t io = {
+        .pin_bit_mask = (1ULL << PIN_FLASH_LED),
+        .mode         = GPIO_MODE_OUTPUT,
+        .pull_up_en   = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type    = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io);
+    for (int i = 0; i < count; i++) {
+        gpio_set_level(PIN_FLASH_LED, 1);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        gpio_set_level(PIN_FLASH_LED, 0);
+        vTaskDelay(pdMS_TO_TICKS(200));
+    }
+}
+
 static void signal_done(void)
 {
     gpio_config_t io = {
@@ -61,6 +79,7 @@ void app_main(void)
     int rssi_pct = 0;
     if (wifi_connect(&rssi_pct) != ESP_OK) {
         ESP_LOGE(TAG, "WLAN fehlgeschlagen — Bild wird verworfen");
+        led_blink_error(6);
         camera_fb_return(fb);
         signal_done();
         return;
@@ -70,6 +89,7 @@ void app_main(void)
     esp_err_t up = scp_upload(fb->buf, fb->len, IMAGE_FILENAME);
     if (up != ESP_OK) {
         ESP_LOGE(TAG, "SCP-Upload fehlgeschlagen");
+        led_blink_error(3);
     }
 
     // 4b. Signalstärke auf dem Server mitloggen
