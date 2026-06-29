@@ -4,7 +4,7 @@
 // SSID und Passwort kommen aus src/wlan_keys.h (nicht im Repo).
 // Vorlage: cp src/wlan_keys.h.example src/wlan_keys.h
 #include "wlan_keys.h"
-#define WIFI_TIMEOUT_MS     20000
+#define WIFI_TIMEOUT_MS     45000
 
 // ── Bild-Dateiname ────────────────────────────────────────────────────────────
 #define IMAGE_FILENAME      "esp32cam_image.jpg"
@@ -18,7 +18,7 @@
 #define SCP_PORT            29876
 #define SCP_USER            "apache"
 #define SCP_REMOTE_DIR      "/var/www/html/img/"
-#define SCP_TIMEOUT_SEC     30
+#define SCP_TIMEOUT_SEC     60
 
 // ── Hardware-Pins (ESP32-CAM AI-Thinker) ─────────────────────────────────────
 #define PIN_DONE            13  // GPIO 13 → DONE-Signal an TPL5110
