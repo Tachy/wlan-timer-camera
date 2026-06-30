@@ -161,8 +161,8 @@
 <title>C2</title>
 <path fill="#e1bee7" stroke="#6a1b9a" stroke-width="1.6" d="M1128,-342.41C1128,-342.41 1058,-342.41 1058,-342.41 1052,-342.41 1046,-336.41 1046,-330.41 1046,-330.41 1046,-289.41 1046,-289.41 1046,-283.41 1052,-277.41 1058,-277.41 1058,-277.41 1128,-277.41 1128,-277.41 1134,-277.41 1140,-283.41 1140,-289.41 1140,-289.41 1140,-330.41 1140,-330.41 1140,-336.41 1134,-342.41 1128,-342.41"/>
 <text text-anchor="middle" x="1093" y="-317.71" font-family="Arial" font-size="9.00">C2</text>
-<text text-anchor="middle" x="1093" y="-307.71" font-family="Arial" font-size="9.00">4700 µF</text>
-<text text-anchor="middle" x="1093" y="-297.71" font-family="Arial" font-size="9.00">Pufferkondensator</text>
+<text text-anchor="middle" x="1093" y="-307.71" font-family="Arial" font-size="9.00">47–100 µF</text>
+<text text-anchor="middle" x="1093" y="-297.71" font-family="Arial" font-size="9.00">VDD&#45;Puffer</text>
 </g>
 <!-- tpl_VDD&#45;&gt;C2 -->
 <g id="edge9" class="edge">

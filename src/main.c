@@ -45,6 +45,10 @@ static void signal_done(void)
     gpio_set_level(PIN_DONE, 1);
     // 200 ms halten, damit TPL5110 den Impuls sicher erkennt
     vTaskDelay(pdMS_TO_TICKS(200));
+    // Pin hochohmig schalten: R2 zieht DONE auf GND zurück,
+    // kein Kriechstrom mehr über R2 wenn GND-MOSFET sperrt
+    gpio_set_direction(PIN_DONE, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(PIN_DONE, GPIO_FLOATING);
 }
 
 // ── Hauptprogramm ────────────────────────────────────────────────────────────

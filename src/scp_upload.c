@@ -117,8 +117,6 @@ esp_err_t scp_upload(const uint8_t *data, size_t len, const char *remote_filenam
     }
 
     libssh2_channel_send_eof(channel);
-    libssh2_channel_wait_eof(channel);
-    libssh2_channel_wait_closed(channel);
 
     ESP_LOGI(TAG, "Upload abgeschlossen: %s (%zu Bytes)", remote_path, len);
     result = ESP_OK;
@@ -184,8 +182,6 @@ esp_err_t ssh_exec_append_log(int rssi_pct)
     }
 
     libssh2_channel_send_eof(channel);
-    libssh2_channel_wait_eof(channel);
-    libssh2_channel_wait_closed(channel);
 
     ESP_LOGI(TAG, "Signal-Log geschrieben: %d %%", rssi_pct);
     result = ESP_OK;

@@ -87,7 +87,7 @@ digraph WlanTimerCamera {
         node [shape=box style="filled,rounded" fontsize=9 fontname="Arial"
               fontcolor=black margin="0.12,0.08" width=1.0 height=0.5]
         C2 [
-            label="C2\n4700 µF\nPufferkondensator"
+            label="C2\n47–100 µF\nVDD-Puffer"
             width=1.3 height=0.9
             fillcolor="#E1BEE7" color="#6A1B9A"
         ]

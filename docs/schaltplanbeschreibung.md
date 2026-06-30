@@ -16,7 +16,7 @@ Der Aufbau ist in vier physische Module gegliedert. Jedes Modul kommuniziert aus
 
 **Modul B — Vorschaltplatine (Streifenrasterplatine mit TPL5110)**
 - U1: TPL5110 Power-Timer IC | Gehäuse: SOT-23-6 oder generischer 5-Pin-Block
-- C2: Pufferkondensator | Elektrolytkondensator | 4700 µF | parallel zu VDD/GND
+- C2: VDD-Pufferkondensator | Elektrolytkondensator | 47–100 µF | parallel zu VDD/GND | puffert Spannungsspike beim MOSFET-Abschalten
 - R1: Timer-Widerstand | 47 kΩ | zwischen U1 DELAY und GND | legt Einschaltdauer auf 6,5 Minuten fest
 - R2: DONE-Pull-down | 10 kΩ | zwischen U1 DONE und GND | verhindert floatenden Eingang
 - Außenpins: `VDD`, `GND`, `DRV (Pin 4)`, `DONE (Pin 5)`
